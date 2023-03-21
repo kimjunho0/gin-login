@@ -2,15 +2,15 @@ package redis
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-redis/redis/v8"
+	"time"
 )
 
 var client *redis.Client
 
 func Connect() {
 	client = redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: "127.0.0.1:6379",
 		DB:   1,
 	})
 }
@@ -21,7 +21,21 @@ func Get(key string) (string, bool) {
 	if err == redis.Nil {
 		exist = false
 	} else if err != nil {
-		fmt.Sprintf("redis error :%v", err)
+		panic("redis get error")
 	}
 	return val, exist
+}
+
+func Set(key string, value string, ttl time.Duration) {
+	err := client.Set(context.Background(), key, value, ttl).Err()
+	if err != nil {
+		panic("redis set error")
+	}
+}
+
+func Delete(key string) {
+	err := client.Del(context.Background(), key).Err()
+	if err != nil {
+		panic("redis del error")
+	}
 }

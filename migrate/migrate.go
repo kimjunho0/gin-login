@@ -6,7 +6,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"gorm.io/plugin/dbresolver"
 	"log"
 	"net/http"
 )
@@ -25,24 +24,24 @@ func ConnectDB() {
 	if err != nil {
 		log.Fatal("DB Connect Failed")
 	}
-	//replica 생성
-	readDsn := "ginlogin:@(localhost)/ginlogin?parseTime=True"
-
-	if readDnsConnectionErr := DB.Use(dbresolver.Register(dbresolver.Config{
-		Replicas: []gorm.Dialector{mysql.Open(readDsn)},
-	})); readDnsConnectionErr != nil {
-		panic("replica error")
-	}
-	//커넥션풀 생성
-
-	sqlDB, connPoolErr := DB.DB()
-
-	if connPoolErr != nil {
-		panic("connection pool error")
-	}
-
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(50)
+	////replica 생성
+	//readDsn := "ginlogin:@(localhost)/ginlogin?parseTime=True"
+	//
+	//if readDnsConnectionErr := DB.Use(dbresolver.Register(dbresolver.Config{
+	//	Replicas: []gorm.Dialector{mysql.Open(readDsn)},
+	//})); readDnsConnectionErr != nil {
+	//	panic("replica error")
+	//}
+	////커넥션풀 생성
+	//
+	//sqlDB, connPoolErr := DB.DB()
+	//
+	//if connPoolErr != nil {
+	//	panic("connection pool error")
+	//}
+	//
+	//sqlDB.SetMaxIdleConns(10)
+	//sqlDB.SetMaxOpenConns(50)
 
 	createTables(DB)
 }

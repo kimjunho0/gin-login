@@ -14,31 +14,31 @@ import (
 )
 
 type Needlogin struct {
-	phoneNumber string `json:"phone_number" binding:"required"`
-	password    string `json:"password" binding:"required"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
+	Password    string `json:"password" binding:"required"`
 }
 
 const AccessTokenTimeOut = 10 * time.Minute
 
 func Login(c *gin.Context) {
 	var login Needlogin
-	if err := c.ShouldBindJSON(&login); err != nil {
-		fmt.Sprintf("login binding error", err)
+	if err := c.ShouldBind(&login); err != nil {
+		fmt.Println(err)
+		panic(err)
 	}
 	//manager.go 의 phonenumber 에 맞는 user 구조체 가져오기
-	fmt.Printf("%v", login)
 
 	//입력한 폰번호와 DB에 있는 폰번호가 일치하는지 확인, 있으면 가져옴
-	manager := middleware.TakeManagerInformation(login.phoneNumber, "id", "password", "refresh_token", "num_password_fail")
+	manager := middleware.TakeManagerInformation(login.PhoneNumber, "id", "password", "refresh_token", "num_password_fail")
 
 	if manager.NumPasswordFail >= 10 {
 		panic("비밀번호 10회 오류")
 	}
 
-	if !PasswordCompare(manager.Password, login.password) {
+	if !PasswordCompare(manager.Password, login.Password) {
 		//비밀번호 불일치
 		if err := migrate.DB.Model(&manager).
-			Where("phone_number = ?", login.phoneNumber).
+			Where("phone_number = ?", login.PhoneNumber).
 			Update("num_password_fail", gorm.Expr("num_password_fail + 1")).Error; err != nil {
 			panic("db error")
 		}

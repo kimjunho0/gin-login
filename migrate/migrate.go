@@ -9,9 +9,12 @@ import (
 	"net/http"
 )
 
+var DB *gorm.DB
+var err error
+
 func ConnectDB() {
 	dsn := "ginlogin:@(localhost)/ginlogin?parseTime=True&loc=Asia%2FSeoul"
-	DB, err := gorm.Open(mysql.Open(dsn))
+	DB, err = gorm.Open(mysql.Open(dsn))
 	if err != nil {
 		log.Fatal("DB Connect Failed")
 	}

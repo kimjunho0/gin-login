@@ -1,8 +1,11 @@
 package middleware
 
-type AccessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresAt   int64  `json:"expires_at"`
+var userok = User{
+	Username: "username",
+	Password: "password",
 }
-type AccessAndRefreshResponse struct {
+
+type User struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }

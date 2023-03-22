@@ -4,6 +4,7 @@ import (
 	"context"
 	"gin-login/docs"
 	"gin-login/internal/handler/auth"
+	"gin-login/middleware"
 	"gin-login/migrate"
 	"gin-login/redis"
 	"github.com/gin-gonic/gin"
@@ -33,6 +34,7 @@ func main() {
 	docs.SwaggerInfo.BasePath = "/"
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.Use(middleware.CorsMiddleware)
 	rAPI := r.Group("/api")
 
 	rAuth := rAPI.Group("/auth")
@@ -41,6 +43,7 @@ func main() {
 		rAuth.POST("/login", auth.Login)
 		rAuth.POST("/reset-password", auth.ResetPassword)
 		rAuth.POST("/logout", auth.Logout)
+		rAuth.POST("/leave", auth.Leave)
 	}
 
 	//서버 시작

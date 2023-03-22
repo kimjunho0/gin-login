@@ -59,7 +59,6 @@ func Login(c *gin.Context) {
 	accessToken, expiresAt := middleware.CreatAccessToken(manager.Id)
 	//manager 구조체 가져온걸로 계속 활용
 	session.Login(manager.Id, accessToken, AccessTokenTimeOut)
-
 	c.JSON(http.StatusOK, middleware.MakeAccessAndRefreshResponse(accessToken, expiresAt, manager.RefreshToken))
 }
 

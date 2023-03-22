@@ -29,20 +29,18 @@ func Register(c *gin.Context) {
 		Name:         body.Name,
 	}
 
-	//transaction 시작
-	tx := migrate.DB.Begin()
-	if err := tx.Error; err != nil {
-		panic("register transaction error")
+	if !IfRegister(body, User) {
+		tx := migrate.DB.Begin()
+		defer tx.Rollback()
+		migrate.DB.Model(&User).
+			Where("phone_number", User.PhoneNumber).
+			Updates(map[string]interface{}{
+				"password":      User.Password,
+				"refresh_token": User.RefreshToken,
+				"name":          User.Name,
+			})
+		tx.Commit()
 	}
-	defer tx.Rollback()
-
-	if err := tx.Create(&User).Error; err != nil {
-		panic("DB create error")
-	}
-
-	tx.Commit()
-	//transaction 끝
-	//transaction 사용하는 이유가 Rollback 때문인가?
 }
 
 func RefreshToken() string {
@@ -55,4 +53,27 @@ func PasswordHash(pw string) string {
 		panic("hash password error")
 	}
 	return string(hash)
+}
+
+func IfRegister(body RegisterIn, User models.User) bool {
+	if err := migrate.DB.Select("phone_number = ?", body.PhoneNumber).Error; err != nil {
+		//transaction 시작
+		tx := migrate.DB.Begin()
+		if err := tx.Error; err != nil {
+			panic("register transaction error")
+		}
+		defer tx.Rollback()
+
+		if err := tx.Create(&User).Error; err != nil {
+			panic("DB create error")
+		}
+
+		tx.Commit()
+		//transaction 끝
+		//transaction 사용하는 이유가 Rollback 때문인가?
+
+		return true
+	}
+	return false
+
 }

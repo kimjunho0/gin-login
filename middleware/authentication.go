@@ -150,5 +150,6 @@ func ParseBearerToken(r *http.Request) string {
 	if err != nil {
 		panic(fmt.Sprintf("ParseBearer error %v", err))
 	}
+
 	return strings.TrimPrefix(token, "Bearer ")
 }

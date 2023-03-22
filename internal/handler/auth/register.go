@@ -17,7 +17,7 @@ type RegisterIn struct {
 }
 
 func Register(c *gin.Context) {
-	var body RegisterIn
+	var body *RegisterIn
 	if err := c.ShouldBind(&body); err != nil {
 		fmt.Sprintf("bind error", err)
 	}
@@ -28,17 +28,40 @@ func Register(c *gin.Context) {
 		RefreshToken: RefreshToken(), //두럭 api 에서는 refresh token 이 바뀌지 않음
 		Name:         body.Name,
 	}
-
-	if !IfRegister(body, User) {
+	Del := func(body *RegisterIn) error {
+		user := models.User{
+			PhoneNumber: body.PhoneNumber,
+		}
+		if err := migrate.DB.Select("deleted_at").Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
+			return err
+		}
+		return nil
+	}
+	fmt.Println(Del(body))
+	if Del(body) != nil {
 		tx := migrate.DB.Begin()
+		if err := tx.Error; err != nil {
+			panic("transaction err")
+		}
 		defer tx.Rollback()
-		migrate.DB.Model(&User).
-			Where("phone_number", User.PhoneNumber).
-			Updates(map[string]interface{}{
-				"password":      User.Password,
-				"refresh_token": User.RefreshToken,
-				"name":          User.Name,
-			})
+		if err := tx.Create(&User).Error; err != nil {
+			panic("register error")
+		}
+		tx.Commit()
+	} else {
+		tx := migrate.DB.Begin()
+		if err := tx.Error; err != nil {
+			panic("transaction err")
+		}
+		defer tx.Rollback()
+		if err := tx.Model(&User).Where("phone_number = ?", body.PhoneNumber).Updates(map[string]interface{}{
+			"password":      User.Password,
+			"refresh_token": User.RefreshToken,
+			"name":          User.Name,
+			"deleted_at":    nil,
+		}).Error; err != nil {
+			panic("update err")
+		}
 		tx.Commit()
 	}
 }
@@ -53,27 +76,4 @@ func PasswordHash(pw string) string {
 		panic("hash password error")
 	}
 	return string(hash)
-}
-
-func IfRegister(body RegisterIn, User models.User) bool {
-	if err := migrate.DB.Select("phone_number = ?", body.PhoneNumber).Error; err != nil {
-		//transaction 시작
-		tx := migrate.DB.Begin()
-		if err := tx.Error; err != nil {
-			panic("register transaction error")
-		}
-		defer tx.Rollback()
-
-		if err := tx.Create(&User).Error; err != nil {
-			panic("DB create error")
-		}
-
-		tx.Commit()
-		//transaction 끝
-		//transaction 사용하는 이유가 Rollback 때문인가?
-
-		return true
-	}
-	return false
-
 }

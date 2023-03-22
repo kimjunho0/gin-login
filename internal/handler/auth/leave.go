@@ -6,6 +6,7 @@ import (
 	"gin-login/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 type Deleted_User struct {
@@ -36,7 +37,7 @@ func Leave(c *gin.Context) {
 	//transaction 시작
 	tx := migrate.DB.Begin()
 	defer tx.Rollback()
-	migrate.DB.Delete(&models.User{}, "id = ?", userId)
+	migrate.DB.Model(&user).Where("id = ?", user.Id).Update("deleted_at", time.Now())
 	tx.Commit()
 	//끝
 	c.Status(http.StatusOK)

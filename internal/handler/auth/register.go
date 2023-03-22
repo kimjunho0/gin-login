@@ -5,7 +5,9 @@ import (
 	"gin-login/migrate"
 	"gin-login/models"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 )
 
 type RegisterIn struct {
@@ -41,6 +43,10 @@ func Register(c *gin.Context) {
 	tx.Commit()
 	//transaction 끝
 	//transaction 사용하는 이유가 Rollback 때문인가?
+}
+
+func RefreshToken() string {
+	return strings.Replace(uuid.New().String(), "-", "", -1) // refresh token 의 exp 존재하지 않음
 }
 
 func PasswordHash(pw string) string {

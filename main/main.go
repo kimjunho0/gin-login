@@ -40,6 +40,7 @@ func main() {
 		rAuth.POST("/register", auth.Register)
 		rAuth.POST("/login", auth.Login)
 		rAuth.POST("/reset-password", auth.ResetPassword)
+		rAuth.POST("/logout", auth.Logout)
 	}
 
 	//서버 시작
@@ -59,7 +60,6 @@ func main() {
 	}()
 
 	WaitForShutdown(srv)
-
 }
 
 func WaitForShutdown(srv *http.Server) {

@@ -26,6 +26,8 @@ func Get(key string) (string, bool) {
 	return val, exist
 }
 
+// ex s_1, access token 만든거, 10분 이런식으로 들어가서
+// key 는 s_1, value는 access token , 유효기간은 10분 으로 key set 을 하는듯
 func Set(key string, value string, ttl time.Duration) {
 	err := client.Set(context.Background(), key, value, ttl).Err()
 	if err != nil {

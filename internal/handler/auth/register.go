@@ -16,6 +16,15 @@ type RegisterIn struct {
 	Name        string `json:"name" binding:"required"`
 }
 
+// @tags auth
+// @Summary register
+// @name register
+// @Accept json
+// @Produce json
+// @Param body body auth.RegisterIn true "전화번호,비밀번호,이름"
+// @Success 200 {object} models.User
+// @Failure 400
+// @Router /api/auth/register [POST]
 func Register(c *gin.Context) {
 	var body *RegisterIn
 	if err := c.ShouldBind(&body); err != nil {

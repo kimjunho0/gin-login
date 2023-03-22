@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  auth.BindRefresh:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
   auth.Needlogin:
     properties:
       password:
@@ -10,6 +17,19 @@ definitions:
     - password
     - phone_number
     type: object
+  auth.RegisterIn:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - name
+    - password
+    - phone_number
+    type: object
   middleware.AccessAndRefreshResponse:
     properties:
       access_token:
@@ -17,6 +37,24 @@ definitions:
       expires_at:
         type: integer
       refresh_token:
+        type: string
+    type: object
+  middleware.AccessTokenResponse:
+    properties:
+      access_token:
+        type: string
+      expires_at:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      num_password_fail:
+        type: integer
+      phone_number:
         type: string
     type: object
 info:
@@ -46,6 +84,78 @@ paths:
         "400":
           description: Bad Request
       summary: login기능
+      tags:
+      - auth
+  /api/auth/logout:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: access token
+        in: header
+        name: auth-token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: logout 기능
+      tags:
+      - auth
+  /api/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: refresh token 으로 access token 갱신
+      parameters:
+      - description: $access token
+        in: header
+        name: auth-token
+        required: true
+        type: string
+      - description: 갱신
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.BindRefresh'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.AccessTokenResponse'
+        "400":
+          description: Bad Request
+      summary: refresh token
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 전화번호,비밀번호,이름
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+      summary: register
       tags:
       - auth
 swagger: "2.0"

@@ -75,9 +75,9 @@ func GetReqManagerIdFromToken(r *http.Request) int {
 		//valid 가 존재하지 않으면 = 유효기간 만료지
 		if !valid {
 			if reason == session.Expired {
-				panic("Expired")
+				panic(http.StatusBadRequest)
 			} else if reason == session.MultiLogin {
-				panic("Multilogin")
+				panic(http.StatusInternalServerError)
 			}
 		}
 		return managerId

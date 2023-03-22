@@ -14,7 +14,17 @@ type BindRefresh struct {
 // refresh token 만들기
 
 // refresh token 바인딩
-
+// @tags auth
+// @Summary  refresh token
+// @Description refresh token 으로 access token 갱신
+// @name refresh token
+// @Accept json
+// @Produce json
+// @Param auth-token header string true "$access token"
+// @Param body body auth.BindRefresh true "갱신"
+// @Success 200 {object} middleware.AccessTokenResponse
+// @Failure 400
+// @Router /api/auth/refresh-token [POST]
 func RefreshAccessToken(c *gin.Context) {
 	var body BindRefresh
 	if err := c.ShouldBind(&body); err != nil {

@@ -44,6 +44,8 @@ func main() {
 		rAuth.POST("/reset-password", auth.ResetPassword)
 		rAuth.POST("/logout", auth.Logout)
 		rAuth.POST("/leave", auth.Leave)
+		rAuth.POST("/refresh-token", auth.RefreshAccessToken)
+		rAuth.GET("info", auth.Info)
 	}
 
 	//서버 시작

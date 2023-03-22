@@ -1,7 +1,10 @@
 package auth
 
 import (
+	"gin-login/middleware"
+	"gin-login/redis/session"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type BindRefresh struct {
@@ -10,12 +13,23 @@ type BindRefresh struct {
 
 // refresh token 만들기
 
-// refresh token 바인딩 해서 바인딩한
+// refresh token 바인딩
 
 func RefreshAccessToken(c *gin.Context) {
 	var body BindRefresh
 	if err := c.ShouldBind(&body); err != nil {
 		panic("create access token binding")
 	}
+	userId := middleware.GetReqManagerIdWithoutExpValidationFromToken(c.Request)
+	userRefresh := middleware.GetInforUserById(userId, "refresh_token") //refresh token userid 로 받아오기
+	if body.RefreshToken != userRefresh.RefreshToken {
+		panic("refresh token 이 일치하지 않음")
+	}
+	token, expiresAt := middleware.CreatAccessToken(userId)
+	//새로운 토큰으로 세션 로그인
+
+	session.Login(userId, token, AccessTokenTimeOut)
+
+	c.JSON(http.StatusOK, middleware.AccessTokenResponse{AccessToken: token, ExpiresAt: expiresAt})
 
 }

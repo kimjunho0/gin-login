@@ -65,8 +65,8 @@ type AccessAndRefreshResponse struct {
 }
 
 func GetReqManagerIdFromToken(r *http.Request) int {
-	token, claims := ParseTokenClaims(r)
-	if token.Valid { //jwt.token 타입의 valid 로 유효성 검사 토큰이 있는지 없는지 검사하는건가?
+	token, claims := ParseTokenClaims(r) //access token 값임
+	if token.Valid {                     //jwt.token.valid 로 유효성 검사 토큰이 있는지 없는지 검사하는건가? valid 는 bool 타입 반환함
 		managerId, _ := strconv.Atoi(claims["sub"].(string))
 		//access token create 할때 넣은 id 자리값을 claims["sub"]으로 다시 받아오는듯
 
@@ -105,9 +105,10 @@ func MakeAccessAndRefreshResponse(accessToken string, expiresAt int64, refreshTo
 	}
 }
 
-// Token 에서 claims 정보 가져오기              토큰하고     토큰 claims 반환(정보)
+// bearer Token 에서 claims 정보 가져오기     토큰하고     토큰 claims 반환(정보)
 func ParseTokenClaims(r *http.Request) (*jwt.Token, jwt.MapClaims) {
-	tokenString := ParseBearerToken(r) //토큰 값 가져온거임
+	tokenString := ParseBearerToken(r) //access토큰 값 auth-token 에서 가져온거임
+	//token 파싱
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unepected signing method %v", token.Header["alg"])
@@ -117,10 +118,10 @@ func ParseTokenClaims(r *http.Request) (*jwt.Token, jwt.MapClaims) {
 	if err != nil {
 		panic(fmt.Sprintf("parse token claims error ", err))
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok { //token.Claims로 토큰 정보를 맵으로 해서 가져온거같음
-		return token, claims
+	if claims, ok := token.Claims.(jwt.MapClaims); ok { //token.Claims 로 파싱한 토큰값 정보를 가져온거같음
+		return token, claims //토큰값과 토큰정보 반환
 	} else {
-		panic("왜난거지")
+		panic("token claims error")
 	}
 }
 func ParseTokenClaimsWithoutExpValidation(r *http.Request) (*jwt.Token, jwt.MapClaims) {
@@ -144,6 +145,7 @@ func ParseTokenClaimsWithoutExpValidation(r *http.Request) (*jwt.Token, jwt.MapC
 // 이건 대체 뭘까 하..
 // request.HeaderExtractor 에서 내가보기엔 auth-token 부분을 ExtractToken으로 가져온듯 함
 // access token에서 가져온걸까?
+// auth-token 이라는 헤더값에서 토큰을 가져오는거임 access token 값이 들어가는것도 맞음
 
 func ParseBearerToken(r *http.Request) string {
 	token, err := request.HeaderExtractor([]string{"auth-token"}).ExtractToken(r)

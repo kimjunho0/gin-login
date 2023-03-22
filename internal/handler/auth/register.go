@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"gin-login/middleware"
 	"gin-login/migrate"
 	"gin-login/models"
 	"github.com/gin-gonic/gin"
@@ -24,14 +23,14 @@ func Register(c *gin.Context) {
 	User := models.User{
 		PhoneNumber:  body.PhoneNumber,
 		Password:     PasswordHash(body.Password),
-		RefreshToken: middleware.RefreshToken(), //두럭 api 에서는 refresh token 이 바뀌지 않음
+		RefreshToken: RefreshToken(), //두럭 api 에서는 refresh token 이 바뀌지 않음
 		Name:         body.Name,
 	}
 
 	//transaction 시작
 	tx := migrate.DB.Begin()
 	if err := tx.Error; err != nil {
-		panic("transaction error")
+		panic("register transaction error")
 	}
 	defer tx.Rollback()
 
@@ -41,7 +40,7 @@ func Register(c *gin.Context) {
 
 	tx.Commit()
 	//transaction 끝
-
+	//transaction 사용하는 이유가 Rollback 때문인가?
 }
 
 func PasswordHash(pw string) string {

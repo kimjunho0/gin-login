@@ -30,7 +30,6 @@ func Login(c *gin.Context) {
 
 	//입력한 폰번호와 DB에 있는 폰번호가 일치하는지 확인, 있으면 가져옴
 	manager := middleware.TakeManagerInformation(login.PhoneNumber, "id", "password", "refresh_token", "num_password_fail")
-
 	if manager.NumPasswordFail >= 10 {
 		panic("비밀번호 10회 오류")
 	}

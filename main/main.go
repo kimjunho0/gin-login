@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"gin-login/docs"
 	"gin-login/internal/handler/auth"
 	"gin-login/migrate"
 	"gin-login/redis"
@@ -16,6 +17,10 @@ import (
 	"time"
 )
 
+// @title Swagger gin-login
+// @version 1.0
+// @description This is a sample server to dooluck
+
 func main() {
 	migrate.ConnectDB()
 	redis.Connect()
@@ -23,6 +28,10 @@ func main() {
 	migrate.DB.Select("id,")
 	r.Use(gin.Logger())
 	gin.SetMode(gin.ReleaseMode)
+
+	//swagger
+	docs.SwaggerInfo.BasePath = "/"
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	rAPI := r.Group("/api")
 
@@ -30,6 +39,7 @@ func main() {
 	{
 		rAuth.POST("/register", auth.Register)
 		rAuth.POST("/login", auth.Login)
+		rAuth.POST("/reset-password", auth.ResetPassword)
 	}
 
 	//서버 시작

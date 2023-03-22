@@ -14,11 +14,12 @@ func TakeManagerInformation(phoneNumber string, project ...string) *models.User 
 		PhoneNumber: phoneNumber,
 	}
 	if err := migrate.DB.Select(project).Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
-		panic("failed take user inform")
+		panic("회원 정보가 없습니다.")
 	}
 	return &user
 }
 
+// access token id 에 따라 다르게 만들어짐
 func CreatAccessToken(id int) (string, int64) {
 	expiresAt := time.Now().Add(10 * time.Minute).Unix()
 

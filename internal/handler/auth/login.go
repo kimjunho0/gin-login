@@ -20,6 +20,15 @@ type Needlogin struct {
 
 const AccessTokenTimeOut = 10 * time.Minute
 
+// @tags auth
+// @Summary login기능
+// @name login
+// @Accept json
+// @Produce json
+// @Param body body auth.Needlogin true "전화번호", "비밀번호"
+// @Success 200 {object} middleware.AccessAndRefreshResponse
+// @Failure 400
+// @Router /api/auth/login [POST]
 func Login(c *gin.Context) {
 	var login Needlogin
 	if err := c.ShouldBind(&login); err != nil {
@@ -39,7 +48,7 @@ func Login(c *gin.Context) {
 		if err := migrate.DB.Model(&manager).
 			Where("phone_number = ?", login.PhoneNumber).
 			Update("num_password_fail", gorm.Expr("num_password_fail + 1")).Error; err != nil {
-			panic("db error")
+			panic(http.StatusBadRequest)
 		}
 		if manager.NumPasswordFail+1 >= 10 {
 			panic("비밀번호 10회 오류입니다. 서비스를 이용하시려면 비밀번호를 변경해주세요")

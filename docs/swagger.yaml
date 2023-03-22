@@ -1,4 +1,51 @@
+basePath: /
+definitions:
+  auth.Needlogin:
+    properties:
+      password:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - password
+    - phone_number
+    type: object
+  middleware.AccessAndRefreshResponse:
+    properties:
+      access_token:
+        type: string
+      expires_at:
+        type: integer
+      refresh_token:
+        type: string
+    type: object
 info:
   contact: {}
-paths: {}
+  description: This is a sample server to dooluck
+  title: Swagger gin-login
+  version: "1.0"
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 전화번호
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.Needlogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.AccessAndRefreshResponse'
+        "400":
+          description: Bad Request
+      summary: login기능
+      tags:
+      - auth
 swagger: "2.0"

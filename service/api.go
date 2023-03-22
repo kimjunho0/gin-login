@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"context"
@@ -21,8 +21,9 @@ import (
 // @title Swagger gin-login
 // @version 1.0
 // @description This is a sample server to dooluck
+// @BasePath /
 
-func main() {
+func Run() {
 	migrate.ConnectDB()
 	redis.Connect()
 	r := gin.New()

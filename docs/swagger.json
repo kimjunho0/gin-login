@@ -1,7 +1,79 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "This is a sample server to dooluck",
+        "title": "Swagger gin-login",
+        "contact": {},
+        "version": "1.0"
     },
-    "paths": {}
+    "basePath": "/",
+    "paths": {
+        "/api/auth/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "login기능",
+                "parameters": [
+                    {
+                        "description": "전화번호",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.Needlogin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.AccessAndRefreshResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "auth.Needlogin": {
+            "type": "object",
+            "required": [
+                "password",
+                "phone_number"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "middleware.AccessAndRefreshResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }

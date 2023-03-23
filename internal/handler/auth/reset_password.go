@@ -50,7 +50,7 @@ func ResetPassword(c *gin.Context) {
 		Message: failed,
 		Status:  constants.StatusFail,
 	}
-	// Todo : 예전 비밀번호와 폰번호 일치하는지 확인 후에 새로운 비밀번호로 변경
+	// Todo : 예전 비밀번호와 폰번호 일치하는지 확인 후에 새로운 비밀번호로 변경 --완료--
 
 	//transaction start
 	tx := migrate.DB.Begin()

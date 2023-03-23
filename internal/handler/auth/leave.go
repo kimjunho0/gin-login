@@ -47,7 +47,7 @@ func Leave(c *gin.Context) {
 		Where("id = ?", user.Id).
 		Select("password").
 		Take(&pw).Error; err != nil {
-		panic(err)
+		panic(cerror.DBErr(err))
 	}
 
 	if !PasswordCompare(pw, user.Password) {

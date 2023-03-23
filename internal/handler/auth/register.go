@@ -54,21 +54,25 @@ func Register(c *gin.Context) {
 
 	//deleted at 을 찾는데 못찾으면 err 값 반환
 
-	Del := func(body *RegisterIn) error {
-		user := models.User{
+	Del := func(body *RegisterIn) bool {
+		model := models.User{
 			PhoneNumber: body.PhoneNumber,
 		}
-		if err := tx.Select("deleted_at").Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
-			return err
+		if err := tx.Where("phone_number = ?", body.PhoneNumber).Find(&model); err != nil {
+			isLeave := tx.Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Find(&model)
+			if isLeave != nil {
+				return true
+			}
+			return false
 		}
-		return nil
+		return false
+
 	}
-	//fmt.Println(Del(body))
 
-	// TODO : tx 변경
-
+	// TODO : tx 변경 --완료--
+	// 여기는 문제가 없음
 	// err 값이 없으면 update err가 있으면 create
-	if Del(body) != nil {
+	if !Del(body) {
 		if err := tx.Error; err != nil {
 			panic(cerror.DBErr(err))
 		}
@@ -79,7 +83,7 @@ func Register(c *gin.Context) {
 		if err := tx.Error; err != nil {
 			panic(cerror.DBErr(err))
 		}
-		if err := tx.Model(&user).Where("phone_number = ?", body.PhoneNumber).Updates(map[string]interface{}{
+		if err := tx.Model(&user).Unscoped().Where("phone_number = ?", body.PhoneNumber).Updates(map[string]interface{}{
 			"password":      user.Password,
 			"refresh_token": user.RefreshToken,
 			"name":          user.Name,

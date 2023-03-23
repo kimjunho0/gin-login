@@ -20,7 +20,7 @@ type BindRefresh struct {
 // @name refresh token
 // @Accept json
 // @Produce json
-// @Param auth-token header string true "$access token"
+// @Param auth-token header string true "access token"
 // @Param body body auth.BindRefresh true "갱신"
 // @Success 200 {object} middleware.AccessTokenResponse
 // @Failure 400

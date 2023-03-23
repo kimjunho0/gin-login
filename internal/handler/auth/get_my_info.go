@@ -12,6 +12,15 @@ type GetInfo struct {
 	Name        string `json:"name"`
 }
 
+// @tags auth
+// @Summary 로그인정보
+// @Description 로그인한 자기 정보 가져오기
+// @Accept json
+// @Produce json
+// @Param auth-token header string true "access token"
+// @Success 200 {object} auth.GetInfo
+// @Failure 400
+// @Router /api/auth/info [GET]
 func Info(c *gin.Context) {
 	userId := middleware.GetReqManagerIdFromToken(c.Request)
 	userinfo := middleware.GetInforUserById(userId, "phone_number", "name")

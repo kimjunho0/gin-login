@@ -7,6 +7,29 @@ definitions:
     required:
     - refresh_token
     type: object
+  auth.Deleted_User:
+    properties:
+      password:
+        type: string
+    required:
+    - password
+    type: object
+  auth.GetInfo:
+    properties:
+      name:
+        type: string
+      phone_number:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  auth.IfSuccessReset:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
   auth.Needlogin:
     properties:
       password:
@@ -27,6 +50,16 @@ definitions:
         type: string
     required:
     - name
+    - password
+    - phone_number
+    type: object
+  auth.ResetModel:
+    properties:
+      password:
+        type: string
+      phone_number:
+        type: string
+    required:
     - password
     - phone_number
     type: object
@@ -63,6 +96,56 @@ info:
   title: Swagger gin-login
   version: "1.0"
 paths:
+  /api/auth/info:
+    get:
+      consumes:
+      - application/json
+      description: 로그인한 자기 정보 가져오기
+      parameters:
+      - description: access token
+        in: header
+        name: auth-token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.GetInfo'
+        "400":
+          description: Bad Request
+      summary: 로그인정보
+      tags:
+      - auth
+  /api/auth/leave:
+    post:
+      consumes:
+      - application/json
+      description: 회원 탈퇴
+      parameters:
+      - description: access token
+        in: header
+        name: auth-token
+        required: true
+        type: string
+      - description: 비밀번호
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.Deleted_User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: 회원탈퇴
+      tags:
+      - auth
   /api/auth/login:
     post:
       consumes:
@@ -112,7 +195,7 @@ paths:
       - application/json
       description: refresh token 으로 access token 갱신
       parameters:
-      - description: $access token
+      - description: access token
         in: header
         name: auth-token
         required: true
@@ -156,6 +239,30 @@ paths:
         "400":
           description: Bad Request
       summary: register
+      tags:
+      - auth
+  /api/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: 비밀번호 초기화
+      parameters:
+      - description: 전화번호, 비밀번호
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ResetModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.IfSuccessReset'
+        "400":
+          description: Bad Request
+      summary: 패스워드 초기화
       tags:
       - auth
 swagger: "2.0"

@@ -16,6 +16,15 @@ type IfSuccessReset struct {
 	Status  string `json:"status"`
 }
 
+// @tags auth
+// @Summary 패스워드 초기화
+// @Description 비밀번호 초기화
+// @Accept json
+// @Produce json
+// @Param body body auth.ResetModel true "전화번호, 비밀번호"
+// @Success 200 {object} auth.IfSuccessReset
+// @Failure 400
+// @Router /api/auth/reset-password [POST]
 func ResetPassword(c *gin.Context) {
 	var body ResetModel
 	if err := c.ShouldBind(&body); err != nil {

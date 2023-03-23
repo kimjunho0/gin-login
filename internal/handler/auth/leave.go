@@ -13,7 +13,16 @@ type Deleted_User struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// 회원 탈퇴
+// @tags auth
+// @Summary 회원탈퇴
+// @Description 회원 탈퇴
+// @Accept json
+// @Produce json
+// @Param auth-token header string true "access token"
+// @Param body body auth.Deleted_User true "비밀번호"
+// @Success 200
+// @Failure 400
+// @Router /api/auth/leave [POST]
 func Leave(c *gin.Context) {
 	var body Deleted_User
 	if err := c.ShouldBind(&body); err != nil {

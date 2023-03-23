@@ -142,7 +142,6 @@ func ParseTokenClaimsWithoutExpValidation(r *http.Request) (*jwt.Token, jwt.MapC
 	}
 }
 
-// 이건 대체 뭘까 하..
 // request.HeaderExtractor 에서 내가보기엔 auth-token 부분을 ExtractToken으로 가져온듯 함
 // access token에서 가져온걸까?
 // auth-token 이라는 헤더값에서 토큰을 가져오는거임 access token 값이 들어가는것도 맞음

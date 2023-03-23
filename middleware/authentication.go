@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gin-login/migrate"
 	"gin-login/models"
+	"gin-login/pkg/cerror"
 	"gin-login/redis/session"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"
@@ -19,7 +20,7 @@ func TakeManagerInformation(phoneNumber string, project ...string) *models.User 
 		PhoneNumber: phoneNumber,
 	}
 	if err := migrate.DB.Select(project).Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
-		panic("회원 정보가 없습니다.")
+		panic(cerror.Forbidden())
 	}
 	return &user
 }
@@ -56,11 +57,11 @@ func CreatAccessToken(id int) (string, int64) {
 
 type AccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
-	ExpiresAt   int64  `json:"expires_at"`
+	ExpiresAt   string `json:"expires_at"`
 }
 type AccessAndRefreshResponse struct {
 	AccessToken  string `json:"access_token"`
-	ExpiresAt    int64  `json:"expires_at"`
+	ExpiresAt    string `json:"expires_at"`
 	RefreshToken string `json:"refresh_token"`
 }
 
@@ -98,9 +99,10 @@ func GetReqManagerIdWithoutExpValidationFromToken(r *http.Request) int {
 
 // 일단은 로그인 할때 나오는 정보인듯 (AccessToken and RefreshToken and ExpiresAt
 func MakeAccessAndRefreshResponse(accessToken string, expiresAt int64, refreshToken string) *AccessAndRefreshResponse {
+	h, m, s := time.Unix(expiresAt, 0).Clock()
 	return &AccessAndRefreshResponse{
 		AccessToken:  accessToken,
-		ExpiresAt:    expiresAt,
+		ExpiresAt:    fmt.Sprintf("로그인 유효 시간 %d시%d분%d초", h, m, s),
 		RefreshToken: refreshToken,
 	}
 }

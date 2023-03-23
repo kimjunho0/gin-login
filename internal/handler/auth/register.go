@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"fmt"
 	"gin-login/migrate"
 	"gin-login/models"
+	"gin-login/pkg/cerror"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -25,13 +25,13 @@ var mystring = "binding err"
 // @Accept json
 // @Produce json
 // @Param body body auth.RegisterIn true "전화번호,비밀번호,이름"
-// @Success 200 {object} models.User
+// @Success 200
 // @Failure 400
 // @Router /api/auth/register [POST]
 func Register(c *gin.Context) {
 	var body *RegisterIn
 	if err := c.ShouldBind(&body); err != nil {
-		panic(err)
+		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 
 	// ToDO : 회원가입시
@@ -46,58 +46,65 @@ func Register(c *gin.Context) {
 		RefreshToken: RefreshToken(), //두럭 api 에서는 refresh token 이 바뀌지 않음
 		Name:         body.Name,
 	}
+	//transaction 시작
+	tx := migrate.DB.Begin()
+	defer tx.Rollback()
 
 	// TODO : unscoped 로 변경
+
+	//deleted at 을 찾는데 못찾으면 err 값 반환
+
 	Del := func(body *RegisterIn) error {
 		user := models.User{
 			PhoneNumber: body.PhoneNumber,
 		}
-		if err := migrate.DB.Select("deleted_at").Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
+		if err := tx.Select("deleted_at").Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
 			return err
 		}
 		return nil
 	}
-	fmt.Println(Del(body))
+	//fmt.Println(Del(body))
 
 	// TODO : tx 변경
+
+	// err 값이 없으면 update err가 있으면 create
 	if Del(body) != nil {
-		tx := migrate.DB.Begin()
 		if err := tx.Error; err != nil {
-			panic("transaction err")
+			panic(cerror.DBErr(err))
 		}
-		defer tx.Rollback()
 		if err := tx.Create(&user).Error; err != nil {
-			panic("register error")
+			panic(cerror.DBErr(err))
 		}
-		tx.Commit()
 	} else {
-		tx := migrate.DB.Begin()
 		if err := tx.Error; err != nil {
-			panic("transaction err")
+			panic(cerror.DBErr(err))
 		}
-		defer tx.Rollback()
 		if err := tx.Model(&user).Where("phone_number = ?", body.PhoneNumber).Updates(map[string]interface{}{
 			"password":      user.Password,
 			"refresh_token": user.RefreshToken,
 			"name":          user.Name,
 			"deleted_at":    nil,
 		}).Error; err != nil {
-			panic("update err")
+			panic(cerror.DBErr(err))
 		}
-		tx.Commit()
 	}
 
-	c.JSON(http.StatusOK, &user)
+	tx.Commit()
+	//transaction 끝
+
+	c.JSON(http.StatusOK, "회원가입 완로")
 }
 
+// refresh token 생성
 func RefreshToken() string {
 	return strings.Replace(uuid.New().String(), "-", "", -1) // refresh token 의 exp 존재하지 않음
 }
 
+// password hash 값으로 변환
 func PasswordHash(pw string) string {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
 	if err != nil {
-		panic("hash password error")
+		panic(cerror.Unknown(err))
 	}
 	return string(hash)
 }

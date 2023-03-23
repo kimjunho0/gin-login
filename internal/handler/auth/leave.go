@@ -4,6 +4,7 @@ import (
 	"gin-login/middleware"
 	"gin-login/migrate"
 	"gin-login/models"
+	"gin-login/pkg/cerror"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -25,7 +26,7 @@ type Deleted_User struct {
 func Leave(c *gin.Context) {
 	var body Deleted_User
 	if err := c.ShouldBind(&body); err != nil {
-		panic("Leave binding error")
+		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 
 	userId := middleware.GetReqManagerIdFromToken(c.Request)
@@ -50,7 +51,8 @@ func Leave(c *gin.Context) {
 	}
 
 	if !PasswordCompare(pw, user.Password) {
-		panic("비밀번호가 틀렸습니다.")
+		c.JSON(http.StatusBadRequest, "비밀번호가 틀렸습니다.")
+		panic(cerror.BadRequest())
 	}
 
 	if err := tx.Delete(&user).Error; err != nil {

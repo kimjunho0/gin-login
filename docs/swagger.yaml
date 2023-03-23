@@ -28,7 +28,7 @@ definitions:
       message:
         type: string
       status:
-        type: string
+        $ref: '#/definitions/constants.Status'
     type: object
   auth.Needlogin:
     properties:
@@ -55,20 +55,40 @@ definitions:
     type: object
   auth.ResetModel:
     properties:
-      password:
+      new_password:
+        type: string
+      old_password:
         type: string
       phone_number:
         type: string
     required:
-    - password
+    - new_password
+    - old_password
     - phone_number
     type: object
+  cerror.CustomError400:
+    properties:
+      message:
+        example: 입력하신 부분을 다시 확인해주세요
+        type: string
+      status_code:
+        example: 400
+        type: integer
+    type: object
+  constants.Status:
+    enum:
+    - Ok
+    - Fail
+    type: string
+    x-enum-varnames:
+    - StatusOk
+    - StatusFail
   middleware.AccessAndRefreshResponse:
     properties:
       access_token:
         type: string
       expires_at:
-        type: integer
+        type: string
       refresh_token:
         type: string
     type: object
@@ -77,17 +97,6 @@ definitions:
       access_token:
         type: string
       expires_at:
-        type: integer
-    type: object
-  models.User:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-      num_password_fail:
-        type: integer
-      phone_number:
         type: string
     type: object
 info:
@@ -151,7 +160,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 전화번호
+      - description: 전화번호, 비밀번호
         in: body
         name: body
         required: true
@@ -166,6 +175,8 @@ paths:
             $ref: '#/definitions/middleware.AccessAndRefreshResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
       summary: login기능
       tags:
       - auth
@@ -234,8 +245,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/models.User'
         "400":
           description: Bad Request
       summary: register

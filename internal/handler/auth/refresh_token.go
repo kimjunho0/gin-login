@@ -1,10 +1,13 @@
 package auth
 
 import (
+	"fmt"
 	"gin-login/middleware"
+	"gin-login/pkg/cerror"
 	"gin-login/redis/session"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 type BindRefresh struct {
@@ -28,18 +31,26 @@ type BindRefresh struct {
 func RefreshAccessToken(c *gin.Context) {
 	var body BindRefresh
 	if err := c.ShouldBind(&body); err != nil {
-		panic("create access token binding")
+		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
+
 	userId := middleware.GetReqManagerIdWithoutExpValidationFromToken(c.Request)
 	userRefresh := middleware.GetInforUserById(userId, "refresh_token") //refresh token userid 로 받아오기
+
+	//입력한 refresh 값과 db의 refresh 값이 다르면 인증정보 만료 반환
 	if body.RefreshToken != userRefresh.RefreshToken {
-		panic("refresh token 이 일치하지 않음")
+		panic(cerror.BadRequestWithMsg(cerror.ErrRefreshTokenInvalid))
 	}
+
 	token, expiresAt := middleware.CreatAccessToken(userId)
 	//새로운 토큰으로 세션 로그인
 
 	session.Login(userId, token, AccessTokenTimeOut)
 
-	c.JSON(http.StatusOK, middleware.AccessTokenResponse{AccessToken: token, ExpiresAt: expiresAt})
+	// token, expire 반환 expire = 분단위로 반환
+	h, m, s := time.Unix(expiresAt, 0).Clock()
+	c.JSON(http.StatusOK, middleware.AccessTokenResponse{AccessToken: token,
+		ExpiresAt: fmt.Sprintf("로그인 유효시간 %d시%d분%d초",
+			h, m, s)})
 
 }

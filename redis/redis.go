@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"gin-login/pkg/cerror"
 	"github.com/go-redis/redis/v8"
 	"time"
 )
@@ -21,7 +22,7 @@ func Get(key string) (string, bool) {
 	if err == redis.Nil {
 		exist = false
 	} else if err != nil {
-		panic("redis get error")
+		panic(cerror.RedisErr(err))
 	}
 	return val, exist
 }
@@ -31,13 +32,13 @@ func Get(key string) (string, bool) {
 func Set(key string, value string, ttl time.Duration) {
 	err := client.Set(context.Background(), key, value, ttl).Err()
 	if err != nil {
-		panic("redis set error")
+		panic(cerror.RedisErr(err))
 	}
 }
 
 func Delete(key string) {
 	err := client.Del(context.Background(), key).Err()
 	if err != nil {
-		panic("redis del error")
+		panic(cerror.RedisErr(err))
 	}
 }

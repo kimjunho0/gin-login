@@ -105,7 +105,7 @@ const docTemplate = `{
                 "summary": "login기능",
                 "parameters": [
                     {
-                        "description": "전화번호",
+                        "description": "전화번호, 비밀번호",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -122,7 +122,10 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
                     }
                 }
             }
@@ -227,10 +230,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
+                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request"
@@ -320,7 +320,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "$ref": "#/definitions/constants.Status"
                 }
             }
         },
@@ -361,17 +361,45 @@ const docTemplate = `{
         "auth.ResetModel": {
             "type": "object",
             "required": [
-                "password",
+                "new_password",
+                "old_password",
                 "phone_number"
             ],
             "properties": {
-                "password": {
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
                     "type": "string"
                 },
                 "phone_number": {
                     "type": "string"
                 }
             }
+        },
+        "cerror.CustomError400": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "입력하신 부분을 다시 확인해주세요"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 400
+                }
+            }
+        },
+        "constants.Status": {
+            "type": "string",
+            "enum": [
+                "Ok",
+                "Fail"
+            ],
+            "x-enum-varnames": [
+                "StatusOk",
+                "StatusFail"
+            ]
         },
         "middleware.AccessAndRefreshResponse": {
             "type": "object",
@@ -380,7 +408,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expires_at": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "refresh_token": {
                     "type": "string"
@@ -394,23 +422,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expires_at": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.User": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "num_password_fail": {
-                    "type": "integer"
-                },
-                "phone_number": {
                     "type": "string"
                 }
             }

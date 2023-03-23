@@ -43,7 +43,7 @@ func Run() {
 	docs.SwaggerInfo.BasePath = "/"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// TODO : 두럭 참고해서 에러 미들웨어 추가
+	// TODO : 두럭 참고해서 에러 미들웨어 추가 -- 완료 --
 	// TODO : authentication middleware 추가
 
 	r.Use(middleware.CorsMiddleware)

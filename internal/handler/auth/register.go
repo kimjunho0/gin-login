@@ -34,8 +34,13 @@ func Register(c *gin.Context) {
 		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 
+	//입력한 폰번호의 길이 확인
+	if len(body.PhoneNumber) < 11 || len(body.PhoneNumber) > 11 {
+		panic(cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
+	}
+
 	// ToDO : 회원가입시
-	//- 휴대폰번호 11자리가 아니면 에러반환
+	//- 휴대폰번호 11자리가 아니면 에러반환 -- 완료 --
 	//- 패스워드 정책 준수
 	//- 이름에 특수기호 못넣게 들어간다면 에러반환
 

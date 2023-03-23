@@ -50,7 +50,7 @@ func Register(c *gin.Context) {
 	tx := migrate.DB.Begin()
 	defer tx.Rollback()
 
-	// TODO : unscoped 로 변경
+	// TODO : unscoped 로 변경 --완료--
 
 	//deleted at 을 찾는데 못찾으면 err 값 반환
 
@@ -58,12 +58,13 @@ func Register(c *gin.Context) {
 		model := models.User{
 			PhoneNumber: body.PhoneNumber,
 		}
-		if err := tx.Where("phone_number = ?", body.PhoneNumber).Find(&model); err != nil {
-			isLeave := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Find(&model)
-			if isLeave != nil {
+		if err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Take(&model).Error; err == nil {
+			err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Take(&model)
+			if err == nil {
 				return true
 			}
-			return false
+			c.JSON(http.StatusBadRequest, "이미 가입된 전화번호입니다.")
+			panic(cerror.BadRequestWithMsg("이미 가입된 전화번호입니다."))
 		}
 		return false
 

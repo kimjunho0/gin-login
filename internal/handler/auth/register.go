@@ -59,7 +59,7 @@ func Register(c *gin.Context) {
 			PhoneNumber: body.PhoneNumber,
 		}
 		if err := tx.Where("phone_number = ?", body.PhoneNumber).Find(&model); err != nil {
-			isLeave := tx.Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Find(&model)
+			isLeave := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Find(&model)
 			if isLeave != nil {
 				return true
 			}

@@ -23,11 +23,7 @@ type GetInfo struct {
 // @Router /api/auth/info [GET]
 func Info(c *gin.Context) {
 	userId := middleware.GetReqManagerIdFromToken(c.Request)
-	userinfo := middleware.GetInforUserById(userId, "phone_number", "name")
-	a := GetInfo{
-		UserId:      userId,
-		PhoneNumber: userinfo.PhoneNumber,
-		Name:        userinfo.Name,
-	}
-	c.JSON(http.StatusOK, a)
+	userInfo := middleware.GetInforUserById(userId, "phone_number", "name")
+
+	c.JSON(http.StatusOK, userInfo)
 }

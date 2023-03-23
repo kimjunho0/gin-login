@@ -24,18 +24,30 @@ import (
 // @BasePath /
 
 func Run() {
+
+	// mysql 연동
 	migrate.ConnectDB()
+	//migrate.DB.Select("id,")
+
+	// redis 연동
 	redis.Connect()
+
+	// gin framework
 	r := gin.New()
-	migrate.DB.Select("id,")
 	r.Use(gin.Logger())
-	gin.SetMode(gin.ReleaseMode)
+
+	// production 환경일시
+	//gin.SetMode(gin.ReleaseMode)
 
 	//swagger
 	docs.SwaggerInfo.BasePath = "/"
-
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// TODO : 두럭 참고해서 에러 미들웨어 추가
+	// TODO : authentication middleware 추가
+
 	r.Use(middleware.CorsMiddleware)
+
 	rAPI := r.Group("/api")
 
 	rAuth := rAPI.Group("/auth")
@@ -44,7 +56,9 @@ func Run() {
 		rAuth.POST("/login", auth.Login)
 		rAuth.POST("/reset-password", auth.ResetPassword)
 		rAuth.POST("/logout", auth.Logout)
+		// TODO : DELETE 로 바꾸기
 		rAuth.POST("/leave", auth.Leave)
+		//rAuth.DELETE(fmt.Sprintf("/leave/:%s", "10"),auth.Leave)
 		rAuth.POST("/refresh-token", auth.RefreshAccessToken)
 		rAuth.GET("info", auth.Info)
 	}

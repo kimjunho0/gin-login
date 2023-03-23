@@ -6,7 +6,6 @@ import (
 	"gin-login/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
 )
 
 type Deleted_User struct {
@@ -28,8 +27,13 @@ func Leave(c *gin.Context) {
 	if err := c.ShouldBind(&body); err != nil {
 		panic("Leave binding error")
 	}
-	//지금 로그인 한 유저 아이디(ID)
+
 	userId := middleware.GetReqManagerIdFromToken(c.Request)
+
+	//transaction 시작
+	tx := migrate.DB.Begin()
+	defer tx.Rollback()
+
 	//입력한 패스워드
 	var user = models.User{
 		Id:       userId,
@@ -38,16 +42,22 @@ func Leave(c *gin.Context) {
 	//기존 pw 가져오기
 	var pw string
 
-	migrate.DB.Model(&models.User{}).Where("id = ?", user.Id).Select("password").Take(&pw)
+	if err := tx.Model(&models.User{}).
+		Where("id = ?", user.Id).
+		Select("password").
+		Take(&pw).Error; err != nil {
+		panic(err)
+	}
 
 	if !PasswordCompare(pw, user.Password) {
 		panic("비밀번호가 틀렸습니다.")
 	}
-	//transaction 시작
-	tx := migrate.DB.Begin()
-	defer tx.Rollback()
-	migrate.DB.Model(&user).Where("id = ?", user.Id).Update("deleted_at", time.Now())
+
+	if err := tx.Delete(&user).Error; err != nil {
+		panic(err)
+	}
+
 	tx.Commit()
 	//끝
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, "유저삭제 완료")
 }

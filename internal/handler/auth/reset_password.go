@@ -8,7 +8,8 @@ import (
 )
 
 type ResetModel struct {
-	Password    string `json:"password" binding:"required"`
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required"`
 }
 type IfSuccessReset struct {
@@ -28,7 +29,7 @@ type IfSuccessReset struct {
 func ResetPassword(c *gin.Context) {
 	var body ResetModel
 	if err := c.ShouldBind(&body); err != nil {
-		panic("reset binding error")
+		panic(err)
 	}
 	Pw := models.User{
 		Password:     PasswordHash(body.Password),
@@ -46,11 +47,14 @@ func ResetPassword(c *gin.Context) {
 			"refresh_token":     Pw.RefreshToken,
 			"num_password_fail": 0,
 		}).Error; err != nil {
-		panic("reset password transaction error")
+
 		c.JSON(http.StatusBadRequest, IfSuccessReset{
 			Message: "Fail Reset",
 			Status:  "Not Registered",
 		})
+
+		panic("reset password transaction error")
+
 	}
 	tx.Commit()
 	//transaction 끝

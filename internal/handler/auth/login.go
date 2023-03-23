@@ -35,7 +35,7 @@ func Login(c *gin.Context) {
 		fmt.Println(err)
 		panic(err)
 	}
-	//manager.go 의 phonenumber 에 맞는 user 구조체 가져오기
+	//user.go 의 phonenumber 에 맞는 user 구조체 가져오기
 
 	//입력한 폰번호와 DB에 있는 폰번호가 일치하는지 확인, 있으면 가져옴
 	manager := middleware.TakeManagerInformation(login.PhoneNumber, "id", "password", "refresh_token", "num_password_fail")
@@ -48,7 +48,7 @@ func Login(c *gin.Context) {
 		if err := migrate.DB.Model(&manager).
 			Where("phone_number = ?", login.PhoneNumber).
 			Update("num_password_fail", gorm.Expr("num_password_fail + 1")).Error; err != nil {
-			panic(http.StatusBadRequest)
+			panic("비밀번호 오류")
 		}
 		if manager.NumPasswordFail+1 >= 10 {
 			panic("비밀번호 10회 오류입니다. 서비스를 이용하시려면 비밀번호를 변경해주세요")

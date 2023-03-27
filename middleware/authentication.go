@@ -2,10 +2,12 @@ package middleware
 
 import (
 	"fmt"
+	"gin-login/internal/constants"
 	"gin-login/migrate"
 	"gin-login/models"
 	"gin-login/pkg/cerror"
 	"gin-login/redis/session"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"
 	"net/http"
@@ -13,6 +15,20 @@ import (
 	"strings"
 	"time"
 )
+
+func AuthenticationMiddleware(c *gin.Context) {
+	managerId := GetReqManagerIdFromToken(c.Request)
+	c.Set(constants.CtxReqManagerId, managerId)
+	c.Next()
+}
+
+func GetReqManagerId(c *gin.Context) int {
+	managerId, exist := c.Get(constants.CtxReqManagerId)
+	if !exist {
+		cerror.Forbidden()
+	}
+	return managerId.(int)
+}
 
 // = FetchManagerByPhoneNumber
 func TakeManagerInformation(phoneNumber string, project ...string) *models.User {

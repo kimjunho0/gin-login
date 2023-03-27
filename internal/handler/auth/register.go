@@ -83,7 +83,7 @@ func Register(c *gin.Context) {
 
 	// TODO : tx 변경 --완료--
 	// 여기는 문제가 없음
-	// err 값이 없으면 update err가 있으면 create
+	// false면 create true면 update
 	if !Del(body) {
 		if err := tx.Error; err != nil {
 			panic(cerror.DBErr(err))

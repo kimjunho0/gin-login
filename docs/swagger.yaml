@@ -52,12 +52,9 @@ definitions:
         type: string
       old_password:
         type: string
-      phone_number:
-        type: string
     required:
     - new_password
     - old_password
-    - phone_number
     type: object
   cerror.CustomError400:
     properties:
@@ -242,13 +239,18 @@ paths:
       summary: register
       tags:
       - auth
-  /api/auth/reset-password:
-    post:
+  /api/auth/reset-password/{num}:
+    patch:
       consumes:
       - application/json
       description: 비밀번호 초기화
       parameters:
-      - description: 전화번호, 비밀번호
+      - description: 전화번호
+        in: path
+        name: num
+        required: true
+        type: string
+      - description: 바꿀 비밀번호, 현재 비밀번호
         in: body
         name: body
         required: true

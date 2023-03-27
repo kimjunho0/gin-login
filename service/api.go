@@ -54,7 +54,7 @@ func Run() {
 	{
 		rAuth.POST("/register", auth.Register)
 		rAuth.POST("/login", auth.Login)
-		rAuth.POST("/reset-password", auth.ResetPassword)
+		rAuth.PATCH("/reset-password/:num", auth.ResetPassword)
 		rAuth.POST("/logout", auth.Logout)
 		// TODO : DELETE 로 바꾸기 -- 완료 --
 		rAuth.DELETE("/leave/:pwd", auth.Leave)

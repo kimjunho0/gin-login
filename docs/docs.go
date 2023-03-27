@@ -236,8 +236,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/reset-password": {
-            "post": {
+        "/api/auth/reset-password/{num}": {
+            "patch": {
                 "description": "비밀번호 초기화",
                 "consumes": [
                     "application/json"
@@ -251,7 +251,14 @@ const docTemplate = `{
                 "summary": "패스워드 초기화",
                 "parameters": [
                     {
-                        "description": "전화번호, 비밀번호",
+                        "type": "string",
+                        "description": "전화번호",
+                        "name": "num",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "바꿀 비밀번호, 현재 비밀번호",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -349,17 +356,13 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "new_password",
-                "old_password",
-                "phone_number"
+                "old_password"
             ],
             "properties": {
                 "new_password": {
                     "type": "string"
                 },
                 "old_password": {
-                    "type": "string"
-                },
-                "phone_number": {
                     "type": "string"
                 }
             }

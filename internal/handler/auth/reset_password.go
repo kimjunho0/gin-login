@@ -11,9 +11,8 @@ import (
 )
 
 type ResetModel struct {
-	OldPassword string `json:"old_password" binding:"required"`
 	NewPassword string `json:"new_password" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required"`
+	OldPassword string `json:"old_password" binding:"required"`
 }
 type IfSuccessReset struct {
 	Message string           `json:"message"`
@@ -30,19 +29,25 @@ const (
 // @Description 비밀번호 초기화
 // @Accept json
 // @Produce json
-// @Param body body auth.ResetModel true "전화번호, 비밀번호"
+// @Param num path string true "전화번호"
+// @Param body body auth.ResetModel true "바꿀 비밀번호, 현재 비밀번호"
 // @Success 200 {object} auth.IfSuccessReset
 // @Failure 400
-// @Router /api/auth/reset-password [POST]
+// @Router /api/auth/reset-password/{num} [PATCH]
 func ResetPassword(c *gin.Context) {
 	var body ResetModel
 	if err := c.ShouldBind(&body); err != nil {
 		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
-	PasswordValidity(body.NewPassword, body.PhoneNumber)
+	phoneNumber, isExist := c.Params.Get("num")
+	if !isExist {
+		panic(cerror.BadRequest())
+	}
+
+	PasswordValidity(body.NewPassword, phoneNumber)
 	Pw := models.User{
 		Password:     PasswordHash(body.NewPassword),
-		PhoneNumber:  body.PhoneNumber,
+		PhoneNumber:  phoneNumber,
 		RefreshToken: RefreshToken(),
 	}
 
@@ -58,7 +63,7 @@ func ResetPassword(c *gin.Context) {
 	defer tx.Rollback()
 
 	//전화번호로 password 가져옴
-	user := middleware.TakeManagerInformation(body.PhoneNumber, "password")
+	user := middleware.TakeManagerInformation(phoneNumber, "password")
 	//폰번호의 비번과 입력한 비번이 일치하는지 확인
 	if !PasswordCompare(user.Password, body.OldPassword) {
 

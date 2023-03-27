@@ -57,13 +57,10 @@ func Login(c *gin.Context) {
 	if manager.NumPasswordFail >= maxNumPasswordFailed {
 		panic(cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
 	}
-	//transaction 시작
-	tx := migrate.DB.Begin()
-	defer tx.Rollback()
 
 	if !PasswordCompare(manager.Password, login.Password) {
 		//비밀번호 불일치
-		if err := tx.Model(&manager).
+		if err := migrate.DB.Model(&manager).
 			Where("phone_number = ?", login.PhoneNumber).
 			Update("num_password_fail", gorm.Expr("num_password_fail + 1")).Error; err != nil {
 			panic(cerror.DBErr(err))
@@ -76,14 +73,11 @@ func Login(c *gin.Context) {
 	}
 
 	//비번 일치
-	if err := tx.Model(&models.User{}).
+	if err := migrate.DB.Model(&models.User{}).
 		Where("phone_number = ?", manager.PhoneNumber).
 		Update("num_password_fail", 0).Error; err != nil {
 		panic(cerror.DBErr(err))
 	}
-
-	//transaction 종료
-	tx.Commit()
 
 	//access 토큰 생성
 	accessToken, expiresAt := middleware.CreatAccessToken(manager.Id)

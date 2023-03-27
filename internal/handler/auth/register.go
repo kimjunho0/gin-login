@@ -8,7 +8,9 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"regexp"
 	"strings"
+	"unicode"
 )
 
 type RegisterIn struct {
@@ -34,15 +36,17 @@ func Register(c *gin.Context) {
 		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 
-	//입력한 폰번호의 길이 확인
-	if len(body.PhoneNumber) < 11 || len(body.PhoneNumber) > 11 {
+	//입력한 폰번호의 길이 확인 & 앞자리 010 인지 확인 <- 이건 나중에 뺄수도
+	if len(body.PhoneNumber) < 11 || len(body.PhoneNumber) > 11 || body.PhoneNumber[0:3] != "010" {
 		panic(cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
 	}
-
-	// ToDO : 회원가입시
+	// 이름, 비번 규칙 확인
+	NameValidity(body.Name)
+	PasswordValidity(body.Password, body.PhoneNumber)
+	// ToDO : 회원가입시 --완료--
 	//- 휴대폰번호 11자리가 아니면 에러반환 -- 완료 --
-	//- 패스워드 정책 준수
-	//- 이름에 특수기호 못넣게 들어간다면 에러반환
+	//- 패스워드 정책 준수 --완료--
+	//- 이름에 특수기호 못넣게 들어간다면 에러반환 -- 완료 --
 
 	// 아까 만든 UserDB 에다가 넣을거임
 	user := models.User{
@@ -55,7 +59,7 @@ func Register(c *gin.Context) {
 	tx := migrate.DB.Begin()
 	defer tx.Rollback()
 
-	// TODO : unscoped 로 변경 --완료--
+	// TODO : unscoped 로 변경 --완료..?--
 
 	//deleted at 을 찾는데 못찾으면 err 값 반환
 
@@ -63,8 +67,10 @@ func Register(c *gin.Context) {
 		model := models.User{
 			PhoneNumber: body.PhoneNumber,
 		}
+		//먼저 전화번호가 데이터베이스에 deleted_at 상관없이 있는지 확인 (unscoped로 deleted가 null이던 null 이 아니던 다 조회)
 		if err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Take(&model).Error; err == nil {
-			err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Take(&model)
+			//deleted at 이 비어있지 않으면 true 반환
+			err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Take(&model).Error
 			if err == nil {
 				return true
 			}
@@ -117,4 +123,59 @@ func PasswordHash(pw string) string {
 		panic(cerror.Unknown(err))
 	}
 	return string(hash)
+}
+
+// 비번,이름 툴
+var isStringSpecialChar = regexp.MustCompile(`[\{\}\[\]\/?.,;:|\)*~!^\-_+<>@\#$%&\\\=\(\'\"\n\r]+`).MatchString
+var isStringNum = regexp.MustCompile(`[0-9]`).MatchString
+var isStringAlphabet = regexp.MustCompile(`[a-zA-Z]`).MatchString
+
+// 이름에 특수문자 안들어가게
+func NameValidity(name string) {
+	if isStringSpecialChar(name) {
+		panic(cerror.BadRequestWithMsg("이름에 특수문자를 포함할 수 없습니다."))
+	}
+}
+
+// 비번 조건 확인
+func PasswordValidity(pw string, number string) {
+	if len(pw) < 8 {
+		panic(cerror.BadRequestWithMsg("비밀번호는 8자 이상이어야 합니다."))
+	}
+	if number == pw {
+		panic(cerror.BadRequestWithMsg("전화번호와 비밀번호를 동일하게 설정할 수 없습니다"))
+	}
+	//영어,숫자,특수문자 하나씩 들어가게 만들기
+	if !isStringNum(pw) || !isStringAlphabet(pw) || !isStringSpecialChar(pw) {
+		panic(cerror.BadRequestWithMsg("영문,숫자,특수문자가 각각 하나 이상 포함되어야 합니다."))
+	}
+	//연속,동일된 문자가 3개이상 되지 않게 (숫자,영어) & 한글 사용 금지
+	for index, str := range pw {
+		if str >= 12593 && str <= 55203 {
+			panic(cerror.BadRequestWithMsg("비밀번호에 한글을 포함할 수 없습니다."))
+		}
+		if unicode.IsDigit(rune(pw[index])) && unicode.IsDigit(rune(pw[index+1])) && unicode.IsDigit(rune(pw[index+2])) {
+			//동일숫자
+			if pw[index] == pw[index+1] && pw[index] == pw[index+2] {
+				panic(cerror.BadRequestWithMsg("동일한 숫자를 3회 이상 반복할 수 없습니다."))
+			}
+			//연속숫자
+			if pw[index]+1 == pw[index+1] && pw[index]+2 == pw[index+2] {
+				panic("연속된 숫자를 3회 이상 사용할 수 없습니다.")
+			}
+		}
+		//연속으로 문자가 쓰였을 경우 그 문자가 연속된 문자인지 확인
+		if unicode.IsLetter(rune(pw[index])) && unicode.IsLetter(rune(pw[index+1])) && unicode.IsLetter(rune(pw[index+2])) {
+			//연속 문자
+			if pw[index]+1 == pw[index+1] && pw[index]+2 == pw[index+2] {
+				panic("연속된 문자를 3회 이상 사용할 수 없습니다.")
+			}
+			//동일 문자
+			if pw[index] == pw[index+1] && pw[index] == pw[index+2] {
+				panic("동일한 문자를 3회 이상 반복할 수 없습니다.")
+			}
+		}
+
+	}
+
 }

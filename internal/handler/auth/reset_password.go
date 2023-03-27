@@ -39,6 +39,7 @@ func ResetPassword(c *gin.Context) {
 	if err := c.ShouldBind(&body); err != nil {
 		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
+	PasswordValidity(body.NewPassword, body.PhoneNumber)
 	Pw := models.User{
 		Password:     PasswordHash(body.NewPassword),
 		PhoneNumber:  body.PhoneNumber,

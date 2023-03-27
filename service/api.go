@@ -56,13 +56,13 @@ func Run() {
 		rAuth.POST("/login", auth.Login)
 		rAuth.POST("/reset-password", auth.ResetPassword)
 		rAuth.POST("/logout", auth.Logout)
-		// TODO : DELETE 로 바꾸기
-		rAuth.POST("/leave", auth.Leave)
+		// TODO : DELETE 로 바꾸기 -- 완료 --
+		rAuth.DELETE("/leave/:pwd", auth.Leave)
 		//rAuth.DELETE(fmt.Sprintf("/leave/:%s", "10"),auth.Leave)
 		rAuth.POST("/refresh-token", auth.RefreshAccessToken)
 		rAuth.GET("info", auth.Info)
 	}
-
+	// TODO : 전체적인 error 메시지 json 으로 출력
 	//서버 시작
 	srv := &http.Server{
 		Handler:      r,

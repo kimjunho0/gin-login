@@ -50,8 +50,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/leave": {
-            "post": {
+        "/api/auth/leave/{pwd}": {
+            "delete": {
                 "description": "회원 탈퇴",
                 "consumes": [
                     "application/json"
@@ -72,13 +72,11 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "비밀번호",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth.Deleted_User"
-                        }
+                        "type": "string",
+                        "description": "패스워드",
+                        "name": "pwd",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -284,17 +282,6 @@ const docTemplate = `{
             ],
             "properties": {
                 "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.Deleted_User": {
-            "type": "object",
-            "required": [
-                "password"
-            ],
-            "properties": {
-                "password": {
                     "type": "string"
                 }
             }

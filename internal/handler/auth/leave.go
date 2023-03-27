@@ -9,36 +9,33 @@ import (
 	"net/http"
 )
 
-type Deleted_User struct {
-	Password string `json:"password" binding:"required"`
-}
-
 // @tags auth
 // @Summary 회원탈퇴
 // @Description 회원 탈퇴
 // @Accept json
 // @Produce json
 // @Param auth-token header string true "access token"
-// @Param body body auth.Deleted_User true "비밀번호"
+// @Param pwd path string true "패스워드"
 // @Success 200
 // @Failure 400
-// @Router /api/auth/leave [POST]
+// @Router /api/auth/leave/{pwd} [DELETE]
 func Leave(c *gin.Context) {
-	var body Deleted_User
-	if err := c.ShouldBind(&body); err != nil {
-		panic(cerror.BadRequestWithMsg(err.Error()))
+	//path 에서 password 받아오기
+	pwd, isExist := c.Params.Get("pwd")
+	if !isExist {
+		panic(cerror.BadRequest())
 	}
-
+	//userid 받아오기
 	userId := middleware.GetReqManagerIdFromToken(c.Request)
 
 	//transaction 시작
 	tx := migrate.DB.Begin()
 	defer tx.Rollback()
 
-	//입력한 패스워드
+	//입력한 패스워드, 토큰에 맞는 아이디
 	var user = models.User{
 		Id:       userId,
-		Password: body.Password,
+		Password: pwd,
 	}
 	//기존 pw 가져오기
 	var pw string
@@ -49,10 +46,9 @@ func Leave(c *gin.Context) {
 		Take(&pw).Error; err != nil {
 		panic(cerror.DBErr(err))
 	}
-
+	//password 비교
 	if !PasswordCompare(pw, user.Password) {
-		c.JSON(http.StatusBadRequest, "비밀번호가 틀렸습니다.")
-		panic(cerror.BadRequest())
+		panic(cerror.BadRequestWithMsg("비번 틀림"))
 	}
 
 	if err := tx.Delete(&user).Error; err != nil {
@@ -60,6 +56,6 @@ func Leave(c *gin.Context) {
 	}
 
 	tx.Commit()
-	//끝
+	//transaction 끝
 	c.JSON(http.StatusOK, "유저삭제 완료")
 }

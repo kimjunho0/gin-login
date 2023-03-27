@@ -7,13 +7,6 @@ definitions:
     required:
     - refresh_token
     type: object
-  auth.Deleted_User:
-    properties:
-      password:
-        type: string
-    required:
-    - password
-    type: object
   auth.GetInfo:
     properties:
       name:
@@ -128,8 +121,8 @@ paths:
       summary: 로그인정보
       tags:
       - auth
-  /api/auth/leave:
-    post:
+  /api/auth/leave/{pwd}:
+    delete:
       consumes:
       - application/json
       description: 회원 탈퇴
@@ -139,12 +132,11 @@ paths:
         name: auth-token
         required: true
         type: string
-      - description: 비밀번호
-        in: body
-        name: body
+      - description: 패스워드
+        in: path
+        name: pwd
         required: true
-        schema:
-          $ref: '#/definitions/auth.Deleted_User'
+        type: string
       produces:
       - application/json
       responses:

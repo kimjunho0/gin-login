@@ -34,7 +34,7 @@ const (
 // @Success 200 {object} auth.IfSuccessReset
 // @Failure 400 {object} cerror.CustomError400
 // @Failure 401 {object} cerror.CustomError401
-// @Failure 500 {object} cerror.CustomError500입
+// @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/reset-password/{num} [PATCH]
 func ResetPassword(c *gin.Context) {
 	var body ResetModel

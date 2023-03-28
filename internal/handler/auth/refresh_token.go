@@ -26,7 +26,9 @@ type BindRefresh struct {
 // @Param auth-token header string true "access token"
 // @Param body body auth.BindRefresh true "갱신"
 // @Success 200 {object} middleware.AccessTokenResponse
-// @Failure 400
+// @Failure 400 {object} cerror.CustomError400
+// @Failure 401 {object} cerror.CustomError401
+// @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/refresh-token [POST]
 func RefreshAccessToken(c *gin.Context) {
 	var body BindRefresh

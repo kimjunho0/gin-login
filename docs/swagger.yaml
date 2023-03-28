@@ -68,6 +68,24 @@ definitions:
         example: 400
         type: integer
     type: object
+  cerror.CustomError401:
+    properties:
+      message:
+        example: 인증에 실패했습니다 다시 로그인 해주세요
+        type: string
+      status_code:
+        example: 401
+        type: integer
+    type: object
+  cerror.CustomError500:
+    properties:
+      message:
+        example: 예기치 않은 오류
+        type: string
+      status_code:
+        example: 500
+        type: integer
+    type: object
   constants.Status:
     enum:
     - Ok
@@ -118,6 +136,16 @@ paths:
             $ref: '#/definitions/auth.GetInfo'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
       summary: 로그인정보
       tags:
       - auth
@@ -144,6 +172,16 @@ paths:
           description: OK
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
       summary: 회원탈퇴
       tags:
       - auth
@@ -169,6 +207,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
       summary: login기능
       tags:
       - auth
@@ -189,6 +235,16 @@ paths:
           description: OK
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
       summary: logout 기능
       tags:
       - auth
@@ -218,6 +274,16 @@ paths:
             $ref: '#/definitions/middleware.AccessTokenResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
       summary: refresh token
       tags:
       - auth
@@ -239,6 +305,16 @@ paths:
           description: OK
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
       summary: register
       tags:
       - auth
@@ -263,6 +339,16 @@ paths:
             $ref: '#/definitions/auth.IfSuccessReset'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
       summary: 패스워드 초기화
       tags:
       - auth

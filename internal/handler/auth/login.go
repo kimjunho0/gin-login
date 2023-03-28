@@ -37,6 +37,8 @@ const (
 // @Param body body auth.Needlogin true "전화번호, 비밀번호"
 // @Success 200 {object} middleware.AccessAndRefreshResponse
 // @Failure 400 {object} cerror.CustomError400
+// @Failure 401 {object} cerror.CustomError401
+// @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/login [POST]
 func Login(c *gin.Context) {
 	var login Needlogin

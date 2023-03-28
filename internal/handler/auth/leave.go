@@ -6,6 +6,7 @@ import (
 	"gin-login/migrate"
 	"gin-login/models"
 	"gin-login/pkg/cerror"
+	"gin-login/redis/session"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -76,6 +77,10 @@ func Leave(c *gin.Context) {
 	}
 
 	tx.Commit()
+
+	//logout from all device
+	session.Logout(userId)
+
 	//transaction 끝
 	c.JSON(http.StatusOK, "유저삭제 완료")
 }

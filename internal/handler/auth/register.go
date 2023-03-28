@@ -59,7 +59,7 @@ func Register(c *gin.Context) {
 		panic(cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
 	}
 
-	// ToDO : 회원가입시 --완료--
+	// TODO : 회원가입시
 	//- 휴대폰번호 11자리가 아니면 에러반환 -- 완료 --
 	//- 패스워드 정책 준수 --완료--
 	//- 이름에 특수기호 못넣게 들어간다면 에러반환 -- 완료 --
@@ -75,7 +75,7 @@ func Register(c *gin.Context) {
 	tx := migrate.DB.Begin()
 	defer tx.Rollback()
 
-	// TODO : unscoped 로 변경 --완료..?--
+	// TODO : unscoped 로 변경
 
 	//deleted at 을 찾는데 못찾으면 err 값 반환
 
@@ -101,7 +101,7 @@ func Register(c *gin.Context) {
 	NameValidity(c, body.Name)
 	PasswordValidity(c, body.Password, body.PhoneNumber)
 
-	// TODO : tx 변경 --완료--
+	// TODO : tx 변경
 	// 여기는 문제가 없음
 	// false면 create true면 update
 	if !Del(body) {

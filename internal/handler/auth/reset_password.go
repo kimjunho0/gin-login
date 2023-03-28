@@ -7,6 +7,7 @@ import (
 	"gin-login/migrate"
 	"gin-login/models"
 	"gin-login/pkg/cerror"
+	"gin-login/redis/session"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -75,7 +76,7 @@ func ResetPassword(c *gin.Context) {
 		Message: failed,
 		Status:  constants.StatusFail,
 	}
-	// Todo : 예전 비밀번호와 폰번호 일치하는지 확인 후에 새로운 비밀번호로 변경 --완료--
+	// Todo : 예전 비밀번호와 폰번호 일치하는지 확인 후에 새로운 비밀번호로 변경
 
 	//transaction start
 	tx := migrate.DB.Begin()
@@ -106,6 +107,15 @@ func ResetPassword(c *gin.Context) {
 
 	tx.Commit()
 	//transaction 끝
+
+	//logout from all device
+	if err := migrate.DB.
+		Select([]string{"id"}).
+		Where("phone_number = ?", user.PhoneNumber).
+		Take(&user).Error; err != nil {
+		panic(cerror.BadRequestWithMsg(err.Error()))
+	}
+	session.Logout(user.Id)
 
 	success := IfSuccessReset{
 		Message: success,

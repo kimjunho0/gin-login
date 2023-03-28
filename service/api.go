@@ -43,8 +43,8 @@ func Run() {
 	docs.SwaggerInfo.BasePath = "/"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// TODO : 두럭 참고해서 에러 미들웨어 추가 -- 완료 --
-	// TODO : authentication middleware 추가 -- 완료? --
+	// TODO : 두럭 참고해서 에러 미들웨어 추가
+	// TODO : authentication middleware 추가
 
 	r.Use(middleware.CorsMiddleware)
 
@@ -56,7 +56,7 @@ func Run() {
 		rAuth.POST("/login", auth.Login)
 		rAuth.PATCH("/reset-password/:num", auth.ResetPassword)
 		rAuth.POST("/logout", auth.Logout)
-		// TODO : DELETE 로 바꾸기 -- 완료 --
+		// TODO : DELETE 로 바꾸기
 		rAuth.DELETE("/leave/:pwd", auth.Leave)
 		//rAuth.DELETE(fmt.Sprintf("/leave/:%s", "10"),auth.Leave)
 		rAuth.POST("/refresh-token", auth.RefreshAccessToken)

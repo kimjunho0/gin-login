@@ -27,7 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "로그인정보",
+                "summary": "get_info",
                 "parameters": [
                     {
                         "type": "string",
@@ -45,7 +45,22 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
                     }
                 }
             }
@@ -62,7 +77,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "회원탈퇴",
+                "summary": "delete_user",
                 "parameters": [
                     {
                         "type": "string",
@@ -84,13 +99,29 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
                     }
                 }
             }
         },
         "/api/auth/login": {
             "post": {
+                "description": "로그인",
                 "consumes": [
                     "application/json"
                 ],
@@ -100,7 +131,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "login기능",
+                "summary": "login",
                 "parameters": [
                     {
                         "description": "전화번호, 비밀번호",
@@ -124,12 +155,25 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/cerror.CustomError400"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
                     }
                 }
             }
         },
         "/api/auth/logout": {
             "post": {
+                "description": "로그아웃",
                 "consumes": [
                     "application/json"
                 ],
@@ -139,7 +183,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "logout 기능",
+                "summary": "logout",
                 "parameters": [
                     {
                         "type": "string",
@@ -154,7 +198,22 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
                     }
                 }
             }
@@ -198,13 +257,29 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
                     }
                 }
             }
         },
         "/api/auth/register": {
             "post": {
+                "description": "회원가입",
                 "consumes": [
                     "application/json"
                 ],
@@ -231,7 +306,22 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
                     }
                 }
             }
@@ -248,7 +338,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "패스워드 초기화",
+                "summary": "reset-password",
                 "parameters": [
                     {
                         "type": "string",
@@ -275,7 +365,22 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
                     }
                 }
             }
@@ -377,6 +482,32 @@ const docTemplate = `{
                 "status_code": {
                     "type": "integer",
                     "example": 400
+                }
+            }
+        },
+        "cerror.CustomError401": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "인증에 실패했습니다 다시 로그인 해주세요"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 401
+                }
+            }
+        },
+        "cerror.CustomError500": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "예기치 않은 오류"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 500
                 }
             }
         },

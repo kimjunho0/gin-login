@@ -25,14 +25,16 @@ const (
 )
 
 // @tags auth
-// @Summary 패스워드 초기화
+// @Summary reset-password
 // @Description 비밀번호 초기화
 // @Accept json
 // @Produce json
 // @Param num path string true "전화번호"
 // @Param body body auth.ResetModel true "바꿀 비밀번호, 현재 비밀번호"
 // @Success 200 {object} auth.IfSuccessReset
-// @Failure 400
+// @Failure 400 {object} cerror.CustomError400
+// @Failure 401 {object} cerror.CustomError401
+// @Failure 500 {object} cerror.CustomError500입
 // @Router /api/auth/reset-password/{num} [PATCH]
 func ResetPassword(c *gin.Context) {
 	var body ResetModel

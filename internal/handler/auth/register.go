@@ -23,12 +23,14 @@ var mystring = "binding err"
 
 // @tags auth
 // @Summary register
-// @name register
+// @Description 회원가입
 // @Accept json
 // @Produce json
 // @Param body body auth.RegisterIn true "전화번호,비밀번호,이름"
 // @Success 200
-// @Failure 400
+// @Failure 400 {object} cerror.CustomError400
+// @Failure 401 {object} cerror.CustomError401
+// @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/register [POST]
 func Register(c *gin.Context) {
 	var body *RegisterIn

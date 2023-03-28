@@ -15,7 +15,7 @@ import (
 )
 
 type Needlogin struct {
-	PhoneNumber string `json:"phone_number" binding:"required,len=11"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
 	Password    string `json:"password" binding:"required"`
 }
 
@@ -30,23 +30,25 @@ const (
 )
 
 // @tags auth
-// @Summary login기능
-// @name login
+// @Summary login
+// @Description 로그인
 // @Accept json
 // @Produce json
 // @Param body body auth.Needlogin true "전화번호, 비밀번호"
 // @Success 200 {object} middleware.AccessAndRefreshResponse
 // @Failure 400 {object} cerror.CustomError400
+// @Failure 401 {object} cerror.CustomError401
+// @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/login [POST]
 func Login(c *gin.Context) {
 	var login Needlogin
 	if err := c.ShouldBind(&login); err != nil {
 		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
-
 	//입력한 폰번호의 길이 확인
 	if len(login.PhoneNumber) < 11 || len(login.PhoneNumber) > 11 {
-		panic(cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
+		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
+		return
 	}
 
 	//user.go 의 phoneNumber 에 맞는 user 구조체 가져오기
@@ -55,7 +57,8 @@ func Login(c *gin.Context) {
 	manager := middleware.TakeManagerInformation(login.PhoneNumber, "id", "password", "refresh_token", "num_password_fail")
 
 	if manager.NumPasswordFail >= maxNumPasswordFailed {
-		panic(cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
+		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
+		return
 	}
 
 	if !PasswordCompare(manager.Password, login.Password) {
@@ -66,9 +69,11 @@ func Login(c *gin.Context) {
 			panic(cerror.DBErr(err))
 		}
 		if manager.NumPasswordFail+1 >= maxNumPasswordFailed {
-			panic(cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
+			c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
+			return
 		} else {
-			panic(cerror.BadRequestWithMsg(fmt.Sprintf(errPasswordNotMatched, manager.NumPasswordFail+1, maxNumPasswordFailed)))
+			c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(fmt.Sprintf(errPasswordNotMatched, manager.NumPasswordFail+1, maxNumPasswordFailed)))
+			return
 		}
 	}
 

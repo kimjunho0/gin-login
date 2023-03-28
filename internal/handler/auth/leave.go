@@ -10,14 +10,16 @@ import (
 )
 
 // @tags auth
-// @Summary 회원탈퇴
+// @Summary delete_user
 // @Description 회원 탈퇴
 // @Accept json
 // @Produce json
 // @Param auth-token header string true "access token"
 // @Param pwd path string true "패스워드"
 // @Success 200
-// @Failure 400
+// @Failure 400 {object} cerror.CustomError400
+// @Failure 401 {object} cerror.CustomError401
+// @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/leave/{pwd} [DELETE]
 func Leave(c *gin.Context) {
 	//path 에서 password 받아오기

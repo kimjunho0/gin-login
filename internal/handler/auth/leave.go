@@ -30,6 +30,13 @@ func Leave(c *gin.Context) {
 		if err := recover(); err != nil {
 			log.Printf(fmt.Sprintf("%v \n %v", err, string(debug.Stack())))
 		}
+		if c.Writer.Written() {
+			return
+		}
+		c.JSON(http.StatusBadRequest, cerror.CustomError{
+			StatusCode: 500,
+			Message:    "Unexpected internal server error!",
+		})
 	}()
 
 	//path 에서 password 받아오기

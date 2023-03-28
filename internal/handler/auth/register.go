@@ -22,8 +22,6 @@ type RegisterIn struct {
 	Name        string `json:"name" binding:"required"`
 }
 
-var mystring = "binding err"
-
 // @tags auth
 // @Summary register
 // @Description 회원가입
@@ -41,6 +39,13 @@ func Register(c *gin.Context) {
 		if err := recover(); err != nil {
 			log.Printf(fmt.Sprintf("%v \n %v", err, string(debug.Stack())))
 		}
+		if c.Writer.Written() {
+			return
+		}
+		c.JSON(http.StatusBadRequest, cerror.CustomError{
+			StatusCode: 500,
+			Message:    "Unexpected internal server error!",
+		})
 	}()
 
 	var body *RegisterIn

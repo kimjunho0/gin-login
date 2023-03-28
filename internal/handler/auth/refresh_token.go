@@ -13,7 +13,7 @@ import (
 )
 
 type BindRefresh struct {
-	RefreshToken string `json:"refresh_token"binding:"required"`
+	RefreshToken string `json:"refresh_token" binding:"required"`
 }
 
 // refresh token 만들기
@@ -22,7 +22,6 @@ type BindRefresh struct {
 // @tags auth
 // @Summary  refresh token
 // @Description refresh token 으로 access token 갱신
-// @name refresh token
 // @Accept json
 // @Produce json
 // @Param auth-token header string true "access token"
@@ -38,6 +37,13 @@ func RefreshAccessToken(c *gin.Context) {
 		if err := recover(); err != nil {
 			log.Printf(fmt.Sprintf("%v \n %v", err, string(debug.Stack())))
 		}
+		if c.Writer.Written() {
+			return
+		}
+		c.JSON(http.StatusBadRequest, cerror.CustomError{
+			StatusCode: 500,
+			Message:    "Unexpected internal server error!",
+		})
 	}()
 
 	var body BindRefresh

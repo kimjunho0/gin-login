@@ -23,5 +23,5 @@ func Logout(c *gin.Context) {
 	managerId := middleware.GetReqManagerIdFromToken(c.Request)
 	//Logout
 	session.Logout(managerId)
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, "로그아웃 완료")
 }

@@ -10,7 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"log"
 	"net/http"
+	"runtime/debug"
 	"time"
 )
 
@@ -41,24 +43,32 @@ const (
 // @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/login [POST]
 func Login(c *gin.Context) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf(fmt.Sprintf("%v \n %v", err, string(debug.Stack())))
+		}
+	}()
+
 	var login Needlogin
 	if err := c.ShouldBind(&login); err != nil {
 		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 	//입력한 폰번호의 길이 확인
 	if len(login.PhoneNumber) < 11 || len(login.PhoneNumber) > 11 {
+
 		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
-		return
+		panic(cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
 	}
 
 	//user.go 의 phoneNumber 에 맞는 user 구조체 가져오기
 
 	//입력한 폰번호와 DB에 있는 폰번호가 일치하는지 확인, 있으면 가져옴
-	manager := middleware.TakeManagerInformation(login.PhoneNumber, "id", "password", "refresh_token", "num_password_fail")
+	manager := middleware.TakeManagerInformation(c, login.PhoneNumber, "id", "password", "refresh_token", "num_password_fail")
 
 	if manager.NumPasswordFail >= maxNumPasswordFailed {
 		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
-		return
+		panic(cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
 	}
 
 	if !PasswordCompare(manager.Password, login.Password) {
@@ -70,10 +80,10 @@ func Login(c *gin.Context) {
 		}
 		if manager.NumPasswordFail+1 >= maxNumPasswordFailed {
 			c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
-			return
+			panic(cerror.BadRequestWithMsg(fmt.Sprintf(errNumPasswordFalExceedTpl, maxNumPasswordFailed)))
 		} else {
 			c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(fmt.Sprintf(errPasswordNotMatched, manager.NumPasswordFail+1, maxNumPasswordFailed)))
-			return
+			panic(cerror.BadRequestWithMsg(fmt.Sprintf(errPasswordNotMatched, manager.NumPasswordFail+1, maxNumPasswordFailed)))
 		}
 	}
 

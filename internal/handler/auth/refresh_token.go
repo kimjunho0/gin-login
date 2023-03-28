@@ -6,7 +6,9 @@ import (
 	"gin-login/pkg/cerror"
 	"gin-login/redis/session"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"runtime/debug"
 	"time"
 )
 
@@ -31,6 +33,13 @@ type BindRefresh struct {
 // @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/refresh-token [POST]
 func RefreshAccessToken(c *gin.Context) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf(fmt.Sprintf("%v \n %v", err, string(debug.Stack())))
+		}
+	}()
+
 	var body BindRefresh
 	if err := c.ShouldBind(&body); err != nil {
 		panic(cerror.BadRequestWithMsg(err.Error()))
@@ -41,6 +50,7 @@ func RefreshAccessToken(c *gin.Context) {
 
 	//입력한 refresh 값과 db의 refresh 값이 다르면 인증정보 만료 반환
 	if body.RefreshToken != userRefresh.RefreshToken {
+		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(cerror.ErrRefreshTokenInvalid))
 		panic(cerror.BadRequestWithMsg(cerror.ErrRefreshTokenInvalid))
 	}
 

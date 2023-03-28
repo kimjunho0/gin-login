@@ -59,7 +59,7 @@ definitions:
   cerror.CustomError400:
     properties:
       message:
-        example: 입력하신 부분을 다시 확인해주세요
+        example: Request body is malformed!
         type: string
       status_code:
         example: 400
@@ -68,7 +68,7 @@ definitions:
   cerror.CustomError401:
     properties:
       message:
-        example: 인증에 실패했습니다 다시 로그인 해주세요
+        example: SignIn required or Refresh token required or Bad SingIn Credential!
         type: string
       status_code:
         example: 401
@@ -77,7 +77,7 @@ definitions:
   cerror.CustomError500:
     properties:
       message:
-        example: 예기치 않은 오류
+        example: Unexpected internal server error!
         type: string
       status_code:
         example: 500

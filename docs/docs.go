@@ -477,7 +477,7 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string",
-                    "example": "입력하신 부분을 다시 확인해주세요"
+                    "example": "Request body is malformed!"
                 },
                 "status_code": {
                     "type": "integer",
@@ -490,7 +490,7 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string",
-                    "example": "인증에 실패했습니다 다시 로그인 해주세요"
+                    "example": "SignIn required or Refresh token required or Bad SingIn Credential!"
                 },
                 "status_code": {
                     "type": "integer",
@@ -503,7 +503,7 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string",
-                    "example": "예기치 않은 오류"
+                    "example": "Unexpected internal server error!"
                 },
                 "status_code": {
                     "type": "integer",

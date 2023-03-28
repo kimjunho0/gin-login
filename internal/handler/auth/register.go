@@ -54,7 +54,7 @@ func Register(c *gin.Context) {
 	user := models.User{
 		PhoneNumber:  body.PhoneNumber,
 		Password:     PasswordHash(body.Password),
-		RefreshToken: RefreshToken(), //두럭 api 에서는 refresh token 이 바뀌지 않음
+		RefreshToken: RefreshToken(),
 		Name:         body.Name,
 	}
 	//transaction 시작

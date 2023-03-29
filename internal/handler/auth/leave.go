@@ -1,16 +1,13 @@
 package auth
 
 import (
-	"fmt"
 	"gin-login/middleware"
 	"gin-login/migrate"
 	"gin-login/models"
 	"gin-login/pkg/cerror"
 	"gin-login/redis/session"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
-	"runtime/debug"
 )
 
 // @tags auth
@@ -26,19 +23,6 @@ import (
 // @Failure 500 {object} cerror.CustomError500
 // @Router /api/auth/leave/{pwd} [DELETE]
 func Leave(c *gin.Context) {
-
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf(fmt.Sprintf("%v \n %v", err, string(debug.Stack())))
-		}
-		if c.Writer.Written() {
-			return
-		}
-		c.JSON(http.StatusBadRequest, cerror.CustomError{
-			StatusCode: 500,
-			Message:    "Unexpected internal server error!",
-		})
-	}()
 
 	//path 에서 password 받아오기
 	pwd, isExist := c.Params.Get("pwd")
@@ -68,8 +52,7 @@ func Leave(c *gin.Context) {
 	}
 	//password 비교
 	if !PasswordCompare(pw, user.Password) {
-		c.JSON(http.StatusBadRequest, "비번 틀림")
-		panic(cerror.BadRequestWithMsg("비번 틀림"))
+		panic(cerror.BadRequestWithMsg("비밀번호가 틀렸습니다."))
 	}
 
 	if err := tx.Delete(&user).Error; err != nil {

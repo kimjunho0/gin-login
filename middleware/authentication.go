@@ -31,12 +31,11 @@ func GetReqManagerId(c *gin.Context) int {
 }
 
 // = FetchManagerByPhoneNumber
-func TakeManagerInformation(c *gin.Context, phoneNumber string, project ...string) *models.User {
+func TakeManagerInformation(phoneNumber string, project ...string) *models.User {
 	user := models.User{
 		PhoneNumber: phoneNumber,
 	}
 	if err := migrate.DB.Select(project).Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
-		c.JSON(http.StatusForbidden, cerror.ForbiddenWithMsg("일치하는 사용자를 찾을 수 없습니다."))
 		panic(cerror.Forbidden())
 	}
 	return &user
@@ -90,7 +89,7 @@ func GetReqManagerIdFromToken(r *http.Request) int {
 
 		//Session 체크 (access 토큰 생성되어 있어야 )
 		valid, reason := session.IsValid(managerId, token.Raw)
-		//valid 가 존재하지 않으면 = 유효기간 만료지
+		//valid 가 존재하지 않으면 = 유효기간 만료
 		if !valid {
 			if reason == session.Expired {
 				panic(http.StatusBadRequest)
@@ -101,7 +100,7 @@ func GetReqManagerIdFromToken(r *http.Request) int {
 		return managerId
 
 	} else {
-		panic("error")
+		panic("GetReqManagerIdFromToken error")
 	}
 
 }

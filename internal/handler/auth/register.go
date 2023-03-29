@@ -1,17 +1,14 @@
 package auth
 
 import (
-	"fmt"
 	"gin-login/migrate"
 	"gin-login/models"
 	"gin-login/pkg/cerror"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"net/http"
 	"regexp"
-	"runtime/debug"
 	"strings"
 	"unicode"
 )
@@ -35,19 +32,6 @@ type RegisterIn struct {
 // @Router /api/auth/register [POST]
 func Register(c *gin.Context) {
 
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf(fmt.Sprintf("%v \n %v", err, string(debug.Stack())))
-		}
-		if c.Writer.Written() {
-			return
-		}
-		c.JSON(http.StatusBadRequest, cerror.CustomError{
-			StatusCode: 500,
-			Message:    "Unexpected internal server error!",
-		})
-	}()
-
 	var body *RegisterIn
 	if err := c.ShouldBind(&body); err != nil {
 		panic(cerror.BadRequestWithMsg(err.Error()))
@@ -55,14 +39,13 @@ func Register(c *gin.Context) {
 
 	//입력한 폰번호의 길이 확인 & 앞자리 010 인지 확인 <- 이건 나중에 뺄수도
 	if len(body.PhoneNumber) < 11 || len(body.PhoneNumber) > 11 || body.PhoneNumber[0:3] != "010" {
-		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
 		panic(cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
 	}
 
 	// TODO : 회원가입시
-	//- 휴대폰번호 11자리가 아니면 에러반환 -- 완료 --
-	//- 패스워드 정책 준수 --완료--
-	//- 이름에 특수기호 못넣게 들어간다면 에러반환 -- 완료 --
+	//- 휴대폰번호 11자리가 아니면 에러반환
+	//- 패스워드 정책 준수
+	//- 이름에 특수기호 못넣게 들어간다면 에러반환
 
 	// 아까 만든 UserDB 에다가 넣을거임
 	user := models.User{
@@ -90,7 +73,6 @@ func Register(c *gin.Context) {
 			if err == nil {
 				return true
 			}
-			c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg("이미 가입된 전화번호입니다."))
 			panic(cerror.BadRequestWithMsg("이미 가입된 전화번호입니다."))
 		}
 		return false
@@ -99,7 +81,7 @@ func Register(c *gin.Context) {
 
 	// 이름, 비번 규칙 확인
 	NameValidity(c, body.Name)
-	PasswordValidity(c, body.Password, body.PhoneNumber)
+	PasswordValidity(body.Password, body.PhoneNumber)
 
 	// TODO : tx 변경
 	// 여기는 문제가 없음
@@ -153,7 +135,6 @@ var isStringAlphabet = regexp.MustCompile(`[a-zA-Z]`).MatchString
 // 이름에 특수문자 안들어가게
 func NameValidity(c *gin.Context, name string) {
 	if isStringSpecialChar(name) {
-		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg("이름에 특수문자를 포함할 수 없습니다."))
 		panic(cerror.BadRequestWithMsg("이름에 특수문자를 포함할 수 없습니다."))
 	}
 }
@@ -170,20 +151,17 @@ const (
 )
 
 // 비번 조건 확인
-func PasswordValidity(c *gin.Context, pw string, number string) {
+func PasswordValidity(pw string, number string) {
 	//비번 길이 확인
 	if len(pw) < 8 {
-		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(errPasswordLenTpl))
 		panic(cerror.BadRequestWithMsg(errPasswordLenTpl))
 	}
 	//전번,비번 동일한지 확인
 	if number == pw {
-		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(errPhoneNumberPasswordEqual))
 		panic(cerror.BadRequestWithMsg(errPhoneNumberPasswordEqual))
 	}
 	//영어,숫자,특수문자 하나씩 들어가게 만들기
 	if !isStringNum(pw) || !isStringAlphabet(pw) || !isStringSpecialChar(pw) {
-		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(errPasswordShouldContainsAllType))
 		panic(cerror.BadRequestWithMsg(errPasswordShouldContainsAllType))
 	}
 
@@ -191,18 +169,15 @@ func PasswordValidity(c *gin.Context, pw string, number string) {
 	for index, str := range pw {
 		if index < len(pw)-2 {
 			if str >= 12593 && str <= 55203 {
-				c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(errPasswordContainsKr))
 				panic(cerror.BadRequestWithMsg(errPasswordContainsKr))
 			}
 			if unicode.IsDigit(rune(pw[index])) && unicode.IsDigit(rune(pw[index+1])) && unicode.IsDigit(rune(pw[index+2])) {
 				//동일숫자
 				if pw[index] == pw[index+1] && pw[index] == pw[index+2] {
-					c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(errSameNumberRepetition))
 					panic(cerror.BadRequestWithMsg(errSameNumberRepetition))
 				}
 				//연속숫자
 				if pw[index]+1 == pw[index+1] && pw[index]+2 == pw[index+2] {
-					c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(errContinuousNumber))
 					panic(cerror.BadRequestWithMsg(errContinuousNumber))
 				}
 			}
@@ -210,12 +185,10 @@ func PasswordValidity(c *gin.Context, pw string, number string) {
 			if unicode.IsLetter(rune(pw[index])) && unicode.IsLetter(rune(pw[index+1])) && unicode.IsLetter(rune(pw[index+2])) {
 				//연속 문자
 				if pw[index]+1 == pw[index+1] && pw[index]+2 == pw[index+2] {
-					c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(errContinuousEng))
 					panic(cerror.BadRequestWithMsg(errContinuousEng))
 				}
 				//동일 문자
 				if pw[index] == pw[index+1] && pw[index] == pw[index+2] {
-					c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg(errSameEngRepetition))
 					panic(cerror.BadRequestWithMsg(errSameEngRepetition))
 				}
 			}

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"gin-login/internal/constants"
 	"gin-login/middleware"
 	"gin-login/migrate"
@@ -9,9 +8,7 @@ import (
 	"gin-login/pkg/cerror"
 	"gin-login/redis/session"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
-	"runtime/debug"
 )
 
 type ResetModel struct {
@@ -25,7 +22,7 @@ type IfSuccessReset struct {
 
 const (
 	success = "비밀번호 리셋 성공"
-	failed  = "비밀번호 리셋 실패"
+	fail    = "비밀번호 리셋 실패"
 )
 
 // @tags auth
@@ -42,19 +39,6 @@ const (
 // @Router /api/auth/reset-password/{num} [PATCH]
 func ResetPassword(c *gin.Context) {
 
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf(fmt.Sprintf("%v \n %v", err, string(debug.Stack())))
-		}
-		if c.Writer.Written() {
-			return
-		}
-		c.JSON(http.StatusBadRequest, cerror.CustomError{
-			StatusCode: 500,
-			Message:    "Unexpected internal server error!",
-		})
-	}()
-
 	var body ResetModel
 	if err := c.ShouldBind(&body); err != nil {
 		panic(cerror.BadRequestWithMsg(err.Error()))
@@ -64,45 +48,45 @@ func ResetPassword(c *gin.Context) {
 		panic(cerror.BadRequest())
 	}
 
-	PasswordValidity(c, body.NewPassword, phoneNumber)
 	Pw := models.User{
 		Password:     PasswordHash(body.NewPassword),
 		PhoneNumber:  phoneNumber,
 		RefreshToken: RefreshToken(),
 	}
 
-	//fail 구조체에 성공유무 넣기
-	fail := IfSuccessReset{
-		Message: failed,
-		Status:  constants.StatusFail,
-	}
 	// Todo : 예전 비밀번호와 폰번호 일치하는지 확인 후에 새로운 비밀번호로 변경
 
 	//transaction start
 	tx := migrate.DB.Begin()
 	defer tx.Rollback()
 
-	//전화번호로 password 가져옴
-	user := middleware.TakeManagerInformation(c, phoneNumber, "password")
-	//폰번호의 비번과 입력한 비번이 일치하는지 확인
-	if !PasswordCompare(user.Password, body.OldPassword) {
-		c.JSON(http.StatusBadRequest, cerror.BadRequestWithMsg("비밀번호가 틀렸습니다."))
-		panic(cerror.BadRequestWithMsg("비밀번호가 틀렸습니다."))
+	resp := IfSuccessReset{
+		Status:  constants.StatusOk,
+		Message: success,
 	}
 
+	//전화번호로 password 가져옴
+	user := middleware.TakeManagerInformation(phoneNumber, "password")
+	//폰번호의 비번과 입력한 비번이 일치하는지 확인
+	if !PasswordCompare(user.Password, body.OldPassword) {
+		panic(cerror.BadRequestWithMsg("비밀번호가 틀렸습니다."))
+	}
+	//바꿀 비번이 규칙에 맞는지
+	PasswordValidity(body.NewPassword, phoneNumber)
+
 	//phone number 에 맞는 password, refresh token, password fail 초기화 혹은 값을 바꿈
-	if err := tx.Model(&Pw).
+	if result := tx.Model(&Pw).
 		Where("phone_number = ?", Pw.PhoneNumber).
 		Updates(map[string]interface{}{
 			"password":          Pw.Password,
 			"refresh_token":     Pw.RefreshToken,
 			"num_password_fail": 0,
-		}).Error; err != nil {
-
-		c.JSON(http.StatusBadRequest, fail)
-
-		panic(cerror.DBErr(err))
-
+		}); result.Error != nil {
+		panic(cerror.DBErr(result.Error))
+		//업데이트 된 레코드 수가 1개가 아니면 = 1개 이상이거나 없으면 실패 메시지 반환
+	} else if result.RowsAffected != 1 {
+		resp.Status = constants.StatusFail
+		resp.Message = fail
 	}
 
 	tx.Commit()
@@ -117,10 +101,5 @@ func ResetPassword(c *gin.Context) {
 	}
 	session.Logout(user.Id)
 
-	success := IfSuccessReset{
-		Message: success,
-		Status:  constants.StatusOk,
-	}
-
-	c.JSON(http.StatusOK, success)
+	c.JSON(http.StatusOK, resp)
 }

@@ -50,6 +50,8 @@ func Run() {
 
 	rAPI := r.Group("/api")
 
+	rAPI.Use(middleware.WrapMiddleware)
+
 	rAuth := rAPI.Group("/auth")
 	{
 		rAuth.POST("/register", auth.Register)
@@ -62,6 +64,7 @@ func Run() {
 		rAuth.POST("/refresh-token", auth.RefreshAccessToken)
 		rAuth.GET("info", auth.Info)
 	}
+
 	// TODO : 전체적인 error 메시지 json 으로 출력
 	//서버 시작
 	srv := &http.Server{

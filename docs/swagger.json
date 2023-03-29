@@ -132,7 +132,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.Needlogin"
+                            "$ref": "#/definitions/auth.NeedLogin"
                         }
                     }
                 ],
@@ -416,7 +416,7 @@
                 }
             }
         },
-        "auth.Needlogin": {
+        "auth.NeedLogin": {
             "type": "object",
             "required": [
                 "password",

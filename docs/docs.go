@@ -139,7 +139,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.Needlogin"
+                            "$ref": "#/definitions/auth.NeedLogin"
                         }
                     }
                 ],
@@ -423,7 +423,7 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.Needlogin": {
+        "auth.NeedLogin": {
             "type": "object",
             "required": [
                 "password",

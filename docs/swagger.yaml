@@ -23,7 +23,7 @@ definitions:
       status:
         $ref: '#/definitions/constants.Status'
     type: object
-  auth.Needlogin:
+  auth.NeedLogin:
     properties:
       password:
         type: string
@@ -193,7 +193,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/auth.Needlogin'
+          $ref: '#/definitions/auth.NeedLogin'
       produces:
       - application/json
       responses:

@@ -80,7 +80,7 @@ func Register(c *gin.Context) {
 	}
 
 	// 이름, 비번 규칙 확인
-	NameValidity(c, body.Name)
+	nameValidity(c, body.Name)
 	PasswordValidity(body.Password, body.PhoneNumber)
 
 	// TODO : tx 변경
@@ -133,7 +133,7 @@ var isStringNum = regexp.MustCompile(`[0-9]`).MatchString
 var isStringAlphabet = regexp.MustCompile(`[a-zA-Z]`).MatchString
 
 // 이름에 특수문자 안들어가게
-func NameValidity(c *gin.Context, name string) {
+func nameValidity(c *gin.Context, name string) {
 	if isStringSpecialChar(name) {
 		panic(cerror.BadRequestWithMsg("이름에 특수문자를 포함할 수 없습니다."))
 	}

@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-type needLogin struct {
+type NeedLogin struct {
 	PhoneNumber string `json:"phone_number" binding:"required"`
 	Password    string `json:"password" binding:"required"`
 }
@@ -34,7 +34,7 @@ const (
 // @Description 로그인
 // @Accept json
 // @Produce json
-// @Param body body auth.Needlogin true "전화번호, 비밀번호"
+// @Param body body auth.NeedLogin true "전화번호, 비밀번호"
 // @Success 200 {object} middleware.AccessAndRefreshResponse
 // @Failure 400 {object} cerror.CustomError400
 // @Failure 401 {object} cerror.CustomError401
@@ -42,7 +42,7 @@ const (
 // @Router /api/auth/login [POST]
 func Login(c *gin.Context) {
 
-	var login needLogin
+	var login NeedLogin
 	if err := c.ShouldBind(&login); err != nil {
 		panic(cerror.BadRequestWithMsg(err.Error()))
 	}

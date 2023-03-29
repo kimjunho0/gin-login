@@ -47,7 +47,9 @@ func ResetPassword(c *gin.Context) {
 	if !isExist {
 		panic(cerror.BadRequest())
 	}
-
+	if IfPhoneNumberIncludeChar(phoneNumber) {
+		panic(cerror.BadRequestWithMsg(errPhoneNumberPasswordEqual))
+	}
 	Pw := models.User{
 		Password:     PasswordHash(body.NewPassword),
 		PhoneNumber:  phoneNumber,

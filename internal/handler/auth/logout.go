@@ -3,6 +3,7 @@ package auth
 import (
 	"gin-login/middleware"
 	"gin-login/redis/session"
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -23,5 +24,9 @@ func Logout(c *gin.Context) {
 	managerId := middleware.GetReqManagerIdFromToken(c.Request)
 	//Logout
 	session.Logout(managerId)
+
+	sentry.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{})
+	})
 	c.JSON(http.StatusOK, "로그아웃 완료")
 }

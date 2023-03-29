@@ -7,6 +7,7 @@ import (
 	"gin-login/middleware"
 	"gin-login/migrate"
 	"gin-login/redis"
+	"gin-login/tools"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -24,6 +25,12 @@ import (
 // @BasePath /
 
 func Run() {
+	tools.InitSentry(
+		"local",
+		"https://80c4f993222946e4b2fa01f5db4e327f@o4504920735612928.ingest.sentry.io/4504920736530432",
+		0.1,
+		"1.0",
+	)
 
 	// mysql 연동
 	migrate.ConnectDB()

@@ -7,6 +7,7 @@ import (
 	"gin-login/models"
 	"gin-login/pkg/cerror"
 	"gin-login/redis/session"
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -89,6 +90,13 @@ func Login(c *gin.Context) {
 
 	//session 접속 (redis.set)
 	session.Login(manager.Id, accessToken, AccessTokenTimeOut)
+
+	sentry.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID:       fmt.Sprintf("%d", manager.Id),
+			Username: login.PhoneNumber,
+		})
+	})
 	c.JSON(http.StatusOK, middleware.MakeAccessAndRefreshResponse(accessToken, expiresAt, manager.RefreshToken))
 }
 

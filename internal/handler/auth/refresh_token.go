@@ -5,6 +5,7 @@ import (
 	"gin-login/middleware"
 	"gin-login/pkg/cerror"
 	"gin-login/redis/session"
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -48,6 +49,13 @@ func RefreshAccessToken(c *gin.Context) {
 	//새로운 토큰으로 세션 로그인
 
 	session.Login(userId, token, AccessTokenTimeOut)
+
+	sentry.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID:       fmt.Sprintf("%d", userRefresh.Id),
+			Username: userRefresh.Name,
+		})
+	})
 
 	// token, expire 반환 expire = 분단위로 반환
 	h, m, s := time.Unix(expiresAt, 0).Clock()

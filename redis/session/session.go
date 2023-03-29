@@ -19,17 +19,17 @@ func Logout(userid int) {
 	redis.Delete(sessionKey(userid))
 }
 
-type InvalidReason int
+type invalidReason int
 
 const (
-	Valid InvalidReason = iota
+	Valid invalidReason = iota
 	Expired
 	MultiLogin
 )
 
 // 중복 로그인 , 로그인 유효기간, 로그인 중인지 확인 하는듯
 // session key 가 client.set 이 되어 있는지 확인하는 과정?
-func IsValid(userid int, token string) (bool, InvalidReason) {
+func IsValid(userid int, token string) (bool, invalidReason) {
 	val, exist := redis.Get(sessionKey(userid))
 	if !exist {
 		return false, Expired

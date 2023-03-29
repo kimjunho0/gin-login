@@ -36,7 +36,7 @@ func TakeManagerInformation(phoneNumber string, project ...string) *models.User 
 		PhoneNumber: phoneNumber,
 	}
 	if err := migrate.DB.Select(project).Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
-		panic(cerror.Forbidden())
+		panic(cerror.ForbiddenWithMsg("일치하는 사용자가 없습니다."))
 	}
 	return &user
 }

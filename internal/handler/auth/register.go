@@ -38,7 +38,7 @@ func Register(c *gin.Context) {
 	}
 
 	//입력한 폰번호의 길이 확인 & 앞자리 010 인지 확인 <- 이건 나중에 뺄수도
-	if len(body.PhoneNumber) < 11 || len(body.PhoneNumber) > 11 || body.PhoneNumber[0:3] != "010" {
+	if len(body.PhoneNumber) < 11 || len(body.PhoneNumber) > 11 || body.PhoneNumber[0:3] != "010" || IfPhoneNumberIncludeChar(body.PhoneNumber) {
 		panic(cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
 	}
 

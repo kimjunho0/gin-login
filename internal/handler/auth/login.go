@@ -11,6 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -18,6 +19,8 @@ type NeedLogin struct {
 	PhoneNumber string `json:"phone_number" binding:"required"`
 	Password    string `json:"password" binding:"required"`
 }
+
+var IfPhoneNumberIncludeChar = regexp.MustCompile(`[a-zA-Zㄱ-힣]`).MatchString
 
 const (
 	maxNumPasswordFailed = 10
@@ -47,7 +50,7 @@ func Login(c *gin.Context) {
 		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 	//입력한 폰번호의 길이 확인
-	if len(login.PhoneNumber) < 11 || len(login.PhoneNumber) > 11 {
+	if len(login.PhoneNumber) < 11 || len(login.PhoneNumber) > 11 || IfPhoneNumberIncludeChar(login.PhoneNumber) {
 		panic(cerror.BadRequestWithMsg(cerror.ErrPhoneNumberReceive))
 	}
 

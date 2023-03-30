@@ -54,7 +54,6 @@ func WrapMiddleware(c *gin.Context) {
 			log.Println(errorStack)
 			log.Println(customError)
 
-			//원래는 이거 안썼었음
 			c.Abort()
 
 		}

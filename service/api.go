@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"gin-login/docs"
-	"gin-login/internal/handler/auth"
+	"gin-login/internal/handler/auth/login"
 	"gin-login/middleware"
 	"gin-login/migrate"
 	"gin-login/redis"
@@ -50,9 +50,6 @@ func Run() {
 	docs.SwaggerInfo.BasePath = "/"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// TODO : 두럭 참고해서 에러 미들웨어 추가
-	// TODO : authentication middleware 추가
-
 	r.Use(middleware.CorsMiddleware)
 
 	rAPI := r.Group("/api")
@@ -61,18 +58,16 @@ func Run() {
 
 	rAuth := rAPI.Group("/auth")
 	{
-		rAuth.POST("/register", auth.Register)
-		rAuth.POST("/login", auth.Login)
-		rAuth.PATCH("/reset-password/:num", auth.ResetPassword)
-		rAuth.POST("/logout", auth.Logout)
-		// TODO : DELETE 로 바꾸기
-		rAuth.DELETE("/leave/:pwd", auth.Leave)
+		rAuth.POST("/register", login.Register)
+		rAuth.POST("/login", login.Login)
+		rAuth.PATCH("/reset-password/:num", login.ResetPassword)
+		rAuth.POST("/logout", login.Logout)
+		rAuth.DELETE("/delete", login.Delete)
 		//rAuth.DELETE(fmt.Sprintf("/leave/:%s", "10"),auth.Leave)
-		rAuth.POST("/refresh-token", auth.RefreshAccessToken)
-		rAuth.GET("info", auth.Info)
+		rAuth.POST("/refresh-token", login.RefreshAccessToken)
+		rAuth.GET("info", login.Info)
 	}
 
-	// TODO : 전체적인 error 메시지 json 으로 출력
 	//서버 시작
 	srv := &http.Server{
 		Handler:      r,

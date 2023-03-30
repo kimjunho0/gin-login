@@ -54,7 +54,7 @@ func Run() {
 
 	rAuth := rAPI.Group("/auth")
 	{
-		rAuth.POST("/register", login.Register)
+		rAuth.PUT("/register", login.Register)
 		rAuth.POST("/login", login.Login)
 		rAuth.PATCH("/reset-password/:num", login.ResetPassword)
 		rAuth.POST("/logout", login.Logout)

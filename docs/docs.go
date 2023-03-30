@@ -41,7 +41,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.GetInfo"
+                            "$ref": "#/definitions/login.GetInfo"
                         }
                     },
                     "400": {
@@ -139,7 +139,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.NeedLogin"
+                            "$ref": "#/definitions/login.NeedLogin"
                         }
                     }
                 ],
@@ -245,7 +245,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.BindRefresh"
+                            "$ref": "#/definitions/login.BindRefresh"
                         }
                     }
                 ],
@@ -278,7 +278,7 @@ const docTemplate = `{
             }
         },
         "/api/auth/register": {
-            "post": {
+            "put": {
                 "description": "회원가입",
                 "consumes": [
                     "application/json"
@@ -297,13 +297,16 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.RegisterIn"
+                            "$ref": "#/definitions/login.RegisterIn"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "201": {
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -353,7 +356,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.ResetModel"
+                            "$ref": "#/definitions/login.ResetModel"
                         }
                     }
                 ],
@@ -361,7 +364,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.IfSuccessReset"
+                            "$ref": "#/definitions/login.IfSuccessReset"
                         }
                     },
                     "400": {
@@ -387,91 +390,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "auth.BindRefresh": {
-            "type": "object",
-            "required": [
-                "refresh_token"
-            ],
-            "properties": {
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.GetInfo": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "auth.IfSuccessReset": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/constants.Status"
-                }
-            }
-        },
-        "auth.NeedLogin": {
-            "type": "object",
-            "required": [
-                "password",
-                "phone_number"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.RegisterIn": {
-            "type": "object",
-            "required": [
-                "name",
-                "password",
-                "phone_number"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
-                }
-            }
-        },
-        "auth.ResetModel": {
-            "type": "object",
-            "required": [
-                "new_password",
-                "old_password"
-            ],
-            "properties": {
-                "new_password": {
-                    "type": "string"
-                },
-                "old_password": {
-                    "type": "string"
-                }
-            }
-        },
         "cerror.CustomError400": {
             "type": "object",
             "properties": {
@@ -521,6 +439,91 @@ const docTemplate = `{
                 "StatusOk",
                 "StatusFail"
             ]
+        },
+        "login.BindRefresh": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "login.GetInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "login.IfSuccessReset": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/constants.Status"
+                }
+            }
+        },
+        "login.NeedLogin": {
+            "type": "object",
+            "required": [
+                "password",
+                "phone_number"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "login.RegisterIn": {
+            "type": "object",
+            "required": [
+                "name",
+                "password",
+                "phone_number"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "login.ResetModel": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
+                    "type": "string"
+                }
+            }
         },
         "middleware.AccessAndRefreshResponse": {
             "type": "object",

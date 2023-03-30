@@ -23,7 +23,6 @@ import (
 // @version 1.0
 // @description This is a sample server to dooluck
 // @BasePath /
-
 func Run() {
 	tools.InitSentry(
 		"local",

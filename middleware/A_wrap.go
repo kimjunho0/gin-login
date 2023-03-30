@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"gin-login/internal/constants"
 	"gin-login/pkg/cerror"
+	"gin-login/tools"
 	"github.com/gin-gonic/gin"
 	"io"
 	"log"
@@ -49,7 +50,7 @@ func WrapMiddleware(c *gin.Context) {
 				}
 			}
 			c.JSON(customError.StatusCode, customError)
-
+			tools.LogError(&customError)
 			errorStack := string(debug.Stack())
 			log.Println(errorStack)
 			log.Println(customError)

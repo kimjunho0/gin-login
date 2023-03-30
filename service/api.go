@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"gin-login/docs"
 	"gin-login/internal/handler/auth/login"
 	"gin-login/middleware"
@@ -13,9 +12,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 )
 
@@ -83,24 +79,7 @@ func Run() {
 		}
 	}()
 
-	WaitForShutdown(srv)
-}
-
-func WaitForShutdown(srv *http.Server) {
-	interruptChan := make(chan os.Signal, 1)
-	signal.Notify(interruptChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	//
-
-	<-interruptChan
-
-	// channel 서버 꺼질때까지 기다려주기
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-	err := srv.Shutdown(ctx)
-	if err != nil {
-		return
-	}
-	log.Println("Shutting down")
-	os.Exit(0)
-
+	//Graceful shutdown
+	//처리중이던 요청들이 모두 처리된 뒤에 종료가 되도록 하는 tool
+	tools.WaitForShutdown(srv)
 }

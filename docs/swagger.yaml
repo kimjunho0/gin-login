@@ -113,6 +113,37 @@ info:
   title: Swagger gin-login
   version: "1.0"
 paths:
+  /api/auth/delete:
+    delete:
+      consumes:
+      - application/json
+      description: 회원 탈퇴
+      parameters:
+      - description: access token
+        in: header
+        name: auth-token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
+      summary: delete_user
+      tags:
+      - auth
   /api/auth/info:
     get:
       consumes:
@@ -144,42 +175,6 @@ paths:
           schema:
             $ref: '#/definitions/cerror.CustomError500'
       summary: get_info
-      tags:
-      - auth
-  /api/auth/leave/{pwd}:
-    delete:
-      consumes:
-      - application/json
-      description: 회원 탈퇴
-      parameters:
-      - description: access token
-        in: header
-        name: auth-token
-        required: true
-        type: string
-      - description: 패스워드
-        in: path
-        name: pwd
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/cerror.CustomError400'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/cerror.CustomError401'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/cerror.CustomError500'
-      summary: delete_user
       tags:
       - auth
   /api/auth/login:
@@ -287,7 +282,7 @@ paths:
       tags:
       - auth
   /api/auth/register:
-    put:
+    post:
       consumes:
       - application/json
       description: 회원가입
@@ -303,8 +298,6 @@ paths:
       responses:
         "200":
           description: OK
-        "201":
-          description: Created
         "400":
           description: Bad Request
           schema:

@@ -15,6 +15,53 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/auth/delete": {
+            "delete": {
+                "description": "회원 탈퇴",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "delete_user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "access token",
+                        "name": "auth-token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/info": {
             "get": {
                 "description": "로그인한 자기 정보 가져오기",
@@ -43,60 +90,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/login.GetInfo"
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/cerror.CustomError400"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/cerror.CustomError401"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/cerror.CustomError500"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/auth/leave/{pwd}": {
-            "delete": {
-                "description": "회원 탈퇴",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "delete_user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "auth-token",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "패스워드",
-                        "name": "pwd",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -278,7 +271,7 @@ const docTemplate = `{
             }
         },
         "/api/auth/register": {
-            "put": {
+            "post": {
                 "description": "회원가입",
                 "consumes": [
                     "application/json"
@@ -304,9 +297,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
-                    },
-                    "201": {
-                        "description": "Created"
                     },
                     "400": {
                         "description": "Bad Request",

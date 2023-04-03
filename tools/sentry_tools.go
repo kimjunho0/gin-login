@@ -24,6 +24,7 @@ func InitSentry(environment string, dsn string, tracesSampleRate float64, versio
 }
 
 func LogError(err error) {
+	// ERROR: 라는 prefix 와 날짜/시간 (표준플래그)를 왼쪽에 고정해서 출력
 	logger := log.New(os.Stdout, "ERROR: ", log.LstdFlags)
 	logger.Println(err)
 	sentry.CaptureException(err)

@@ -24,6 +24,7 @@ import (
 func Delete(c *gin.Context) {
 
 	// TODO : 회원가입 로직 다시 생각해보기
+
 	//token 에서 아이디 불러와서
 	userId := middleware.GetReqManagerIdFromToken(c.Request)
 	// 그 아이디 쿼리 삭제

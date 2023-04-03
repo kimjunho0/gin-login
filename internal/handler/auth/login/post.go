@@ -227,11 +227,13 @@ func Register(c *gin.Context) {
 
 	// 여기는 문제가 없음
 	// false면 create true면 update
-	if !deletedUser(tx, body) {
+	if !ifDeletedUser(tx, body) {
 		if err := tx.Create(&user).Error; err != nil {
 			//duplicate 검사
 			if db_error.IsUniqueViolation(err) {
-				panic(cerror.BadRequestWithMsg("이미 가입된 전화번호 입니다."))
+				if strings.Contains(err.Error(), "phone_number") {
+					panic(cerror.BadRequestWithMsg("이미 가입된 전화번호 입니다."))
+				}
 			}
 			panic(cerror.DBErr(err))
 		}
@@ -338,7 +340,7 @@ func PasswordValidity(pw string, number string) {
 	}
 }
 
-func deletedUser(tx *gorm.DB, body *RegisterIn) bool {
+func ifDeletedUser(tx *gorm.DB, body *RegisterIn) bool {
 	var model *models.User
 	//err 가 있으면 false 반환, 없으면 다음 조건문 실행
 	if err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Take(&model).Error; err != nil {

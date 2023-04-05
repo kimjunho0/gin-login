@@ -15,57 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth/info": {
-            "get": {
-                "description": "로그인한 자기 정보 가져오기",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "로그인정보",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "access token",
-                        "name": "auth-token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/auth.GetInfo"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/cerror.CustomError400"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/cerror.CustomError401"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/cerror.CustomError500"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/auth/leave/{pwd}": {
+        "/api/auth/delete": {
             "delete": {
                 "description": "회원 탈퇴",
                 "consumes": [
@@ -77,20 +27,13 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "회원탈퇴",
+                "summary": "delete_user",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "access token",
                         "name": "auth-token",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "패스워드",
-                        "name": "pwd",
-                        "in": "path",
                         "required": true
                     }
                 ],
@@ -119,8 +62,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/login": {
-            "post": {
+        "/api/auth/info": {
+            "get": {
+                "description": "로그인한 자기 정보 가져오기",
                 "consumes": [
                     "application/json"
                 ],
@@ -130,7 +74,57 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "login기능",
+                "summary": "get_info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "access token",
+                        "name": "auth-token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/login.GetInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError400"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError401"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/cerror.CustomError500"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "description": "로그인",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "login",
                 "parameters": [
                     {
                         "description": "전화번호, 비밀번호",
@@ -138,7 +132,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.Needlogin"
+                            "$ref": "#/definitions/login.NeedLogin"
                         }
                     }
                 ],
@@ -172,6 +166,7 @@ const docTemplate = `{
         },
         "/api/auth/logout": {
             "post": {
+                "description": "로그아웃",
                 "consumes": [
                     "application/json"
                 ],
@@ -181,7 +176,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "logout 기능",
+                "summary": "logout",
                 "parameters": [
                     {
                         "type": "string",
@@ -243,7 +238,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.BindRefresh"
+                            "$ref": "#/definitions/login.BindRefresh"
                         }
                     }
                 ],
@@ -277,6 +272,7 @@ const docTemplate = `{
         },
         "/api/auth/register": {
             "post": {
+                "description": "회원가입",
                 "consumes": [
                     "application/json"
                 ],
@@ -294,7 +290,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.RegisterIn"
+                            "$ref": "#/definitions/login.RegisterIn"
                         }
                     }
                 ],
@@ -323,8 +319,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/auth/reset-password": {
-            "post": {
+        "/api/auth/reset-password/{num}": {
+            "patch": {
                 "description": "비밀번호 초기화",
                 "consumes": [
                     "application/json"
@@ -335,15 +331,22 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "패스워드 초기화",
+                "summary": "reset-password",
                 "parameters": [
                     {
-                        "description": "전화번호, 비밀번호",
+                        "type": "string",
+                        "description": "전화번호",
+                        "name": "num",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "바꿀 비밀번호, 현재 비밀번호",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.ResetModel"
+                            "$ref": "#/definitions/login.ResetModel"
                         }
                     }
                 ],
@@ -351,7 +354,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.IfSuccessReset"
+                            "$ref": "#/definitions/login.IfSuccessReset"
                         }
                     },
                     "400": {
@@ -377,7 +380,57 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "auth.BindRefresh": {
+        "cerror.CustomError400": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Request body is malformed!"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 400
+                }
+            }
+        },
+        "cerror.CustomError401": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "SignIn required or Refresh token required or Bad SingIn Credential!"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 401
+                }
+            }
+        },
+        "cerror.CustomError500": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Unexpected internal server error!"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 500
+                }
+            }
+        },
+        "constants.Status": {
+            "type": "string",
+            "enum": [
+                "Ok",
+                "Fail"
+            ],
+            "x-enum-varnames": [
+                "StatusOk",
+                "StatusFail"
+            ]
+        },
+        "login.BindRefresh": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -388,7 +441,7 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.GetInfo": {
+        "login.GetInfo": {
             "type": "object",
             "properties": {
                 "name": {
@@ -402,7 +455,7 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.IfSuccessReset": {
+        "login.IfSuccessReset": {
             "type": "object",
             "properties": {
                 "message": {
@@ -413,7 +466,7 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.Needlogin": {
+        "login.NeedLogin": {
             "type": "object",
             "required": [
                 "password",
@@ -428,7 +481,7 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.RegisterIn": {
+        "login.RegisterIn": {
             "type": "object",
             "required": [
                 "name",
@@ -447,12 +500,11 @@ const docTemplate = `{
                 }
             }
         },
-        "auth.ResetModel": {
+        "login.ResetModel": {
             "type": "object",
             "required": [
                 "new_password",
-                "old_password",
-                "phone_number"
+                "old_password"
             ],
             "properties": {
                 "new_password": {
@@ -460,61 +512,8 @@ const docTemplate = `{
                 },
                 "old_password": {
                     "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
                 }
             }
-        },
-        "cerror.CustomError400": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "입력하신 부분을 다시 확인해주세요"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 400
-                }
-            }
-        },
-        "cerror.CustomError401": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "인증에 실패했습니다 다시 로그인 해주세요"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 401
-                }
-            }
-        },
-        "cerror.CustomError500": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "예기치 않은 오류"
-                },
-                "status_code": {
-                    "type": "integer",
-                    "example": 500
-                }
-            }
-        },
-        "constants.Status": {
-            "type": "string",
-            "enum": [
-                "Ok",
-                "Fail"
-            ],
-            "x-enum-varnames": [
-                "StatusOk",
-                "StatusFail"
-            ]
         },
         "middleware.AccessAndRefreshResponse": {
             "type": "object",

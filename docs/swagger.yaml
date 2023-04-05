@@ -1,68 +1,9 @@
 basePath: /
 definitions:
-  auth.BindRefresh:
-    properties:
-      refresh_token:
-        type: string
-    required:
-    - refresh_token
-    type: object
-  auth.GetInfo:
-    properties:
-      name:
-        type: string
-      phone_number:
-        type: string
-      user_id:
-        type: integer
-    type: object
-  auth.IfSuccessReset:
-    properties:
-      message:
-        type: string
-      status:
-        $ref: '#/definitions/constants.Status'
-    type: object
-  auth.Needlogin:
-    properties:
-      password:
-        type: string
-      phone_number:
-        type: string
-    required:
-    - password
-    - phone_number
-    type: object
-  auth.RegisterIn:
-    properties:
-      name:
-        type: string
-      password:
-        type: string
-      phone_number:
-        type: string
-    required:
-    - name
-    - password
-    - phone_number
-    type: object
-  auth.ResetModel:
-    properties:
-      new_password:
-        type: string
-      old_password:
-        type: string
-      phone_number:
-        type: string
-    required:
-    - new_password
-    - old_password
-    - phone_number
-    type: object
   cerror.CustomError400:
     properties:
       message:
-        example: 입력하신 부분을 다시 확인해주세요
+        example: Request body is malformed!
         type: string
       status_code:
         example: 400
@@ -71,7 +12,7 @@ definitions:
   cerror.CustomError401:
     properties:
       message:
-        example: 인증에 실패했습니다 다시 로그인 해주세요
+        example: SignIn required or Refresh token required or Bad SingIn Credential!
         type: string
       status_code:
         example: 401
@@ -80,7 +21,7 @@ definitions:
   cerror.CustomError500:
     properties:
       message:
-        example: 예기치 않은 오류
+        example: Unexpected internal server error!
         type: string
       status_code:
         example: 500
@@ -94,6 +35,62 @@ definitions:
     x-enum-varnames:
     - StatusOk
     - StatusFail
+  login.BindRefresh:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  login.GetInfo:
+    properties:
+      name:
+        type: string
+      phone_number:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  login.IfSuccessReset:
+    properties:
+      message:
+        type: string
+      status:
+        $ref: '#/definitions/constants.Status'
+    type: object
+  login.NeedLogin:
+    properties:
+      password:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - password
+    - phone_number
+    type: object
+  login.RegisterIn:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - name
+    - password
+    - phone_number
+    type: object
+  login.ResetModel:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
   middleware.AccessAndRefreshResponse:
     properties:
       access_token:
@@ -116,6 +113,37 @@ info:
   title: Swagger gin-login
   version: "1.0"
 paths:
+  /api/auth/delete:
+    delete:
+      consumes:
+      - application/json
+      description: 회원 탈퇴
+      parameters:
+      - description: access token
+        in: header
+        name: auth-token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/cerror.CustomError400'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/cerror.CustomError401'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/cerror.CustomError500'
+      summary: delete_user
+      tags:
+      - auth
   /api/auth/info:
     get:
       consumes:
@@ -133,7 +161,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.GetInfo'
+            $ref: '#/definitions/login.GetInfo'
         "400":
           description: Bad Request
           schema:
@@ -146,56 +174,21 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/cerror.CustomError500'
-      summary: 로그인정보
-      tags:
-      - auth
-  /api/auth/leave/{pwd}:
-    delete:
-      consumes:
-      - application/json
-      description: 회원 탈퇴
-      parameters:
-      - description: access token
-        in: header
-        name: auth-token
-        required: true
-        type: string
-      - description: 패스워드
-        in: path
-        name: pwd
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/cerror.CustomError400'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/cerror.CustomError401'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/cerror.CustomError500'
-      summary: 회원탈퇴
+      summary: get_info
       tags:
       - auth
   /api/auth/login:
     post:
       consumes:
       - application/json
+      description: 로그인
       parameters:
       - description: 전화번호, 비밀번호
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/auth.Needlogin'
+          $ref: '#/definitions/login.NeedLogin'
       produces:
       - application/json
       responses:
@@ -215,13 +208,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/cerror.CustomError500'
-      summary: login기능
+      summary: login
       tags:
       - auth
   /api/auth/logout:
     post:
       consumes:
       - application/json
+      description: 로그아웃
       parameters:
       - description: access token
         in: header
@@ -245,7 +239,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/cerror.CustomError500'
-      summary: logout 기능
+      summary: logout
       tags:
       - auth
   /api/auth/refresh-token:
@@ -264,7 +258,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/auth.BindRefresh'
+          $ref: '#/definitions/login.BindRefresh'
       produces:
       - application/json
       responses:
@@ -291,13 +285,14 @@ paths:
     post:
       consumes:
       - application/json
+      description: 회원가입
       parameters:
       - description: 전화번호,비밀번호,이름
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/auth.RegisterIn'
+          $ref: '#/definitions/login.RegisterIn'
       produces:
       - application/json
       responses:
@@ -318,25 +313,30 @@ paths:
       summary: register
       tags:
       - auth
-  /api/auth/reset-password:
-    post:
+  /api/auth/reset-password/{num}:
+    patch:
       consumes:
       - application/json
       description: 비밀번호 초기화
       parameters:
-      - description: 전화번호, 비밀번호
+      - description: 전화번호
+        in: path
+        name: num
+        required: true
+        type: string
+      - description: 바꿀 비밀번호, 현재 비밀번호
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/auth.ResetModel'
+          $ref: '#/definitions/login.ResetModel'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.IfSuccessReset'
+            $ref: '#/definitions/login.IfSuccessReset'
         "400":
           description: Bad Request
           schema:
@@ -349,7 +349,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/cerror.CustomError500'
-      summary: 패스워드 초기화
+      summary: reset-password
       tags:
       - auth
 swagger: "2.0"

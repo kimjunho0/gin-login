@@ -1,20 +1,17 @@
 package service
 
 import (
-	"context"
 	"gin-login/docs"
-	"gin-login/internal/handler/auth"
+	"gin-login/internal/handler/auth/login"
 	"gin-login/middleware"
 	"gin-login/migrate"
 	"gin-login/redis"
+	"gin-login/tools"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 )
 
@@ -22,8 +19,13 @@ import (
 // @version 1.0
 // @description This is a sample server to dooluck
 // @BasePath /
-
 func Run() {
+	tools.InitSentry(
+		"local",
+		"https://80c4f993222946e4b2fa01f5db4e327f@o4504920735612928.ingest.sentry.io/4504920736530432",
+		0.1,
+		"1.0",
+	)
 
 	// mysql 연동
 	migrate.ConnectDB()
@@ -43,26 +45,24 @@ func Run() {
 	docs.SwaggerInfo.BasePath = "/"
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// TODO : 두럭 참고해서 에러 미들웨어 추가 -- 완료 --
-	// TODO : authentication middleware 추가 -- 완료? --
-
 	r.Use(middleware.CorsMiddleware)
 
 	rAPI := r.Group("/api")
 
+	rAPI.Use(middleware.WrapMiddleware)
+
 	rAuth := rAPI.Group("/auth")
 	{
-		rAuth.POST("/register", auth.Register)
-		rAuth.POST("/login", auth.Login)
-		rAuth.POST("/reset-password", auth.ResetPassword)
-		rAuth.POST("/logout", auth.Logout)
-		// TODO : DELETE 로 바꾸기 -- 완료 --
-		rAuth.DELETE("/leave/:pwd", auth.Leave)
+		rAuth.POST("/register", login.Register)
+		rAuth.POST("/login", login.Login)
+		rAuth.PATCH("/reset-password/:num", login.ResetPassword)
+		rAuth.POST("/logout", login.Logout)
+		rAuth.DELETE("/delete", login.Delete)
 		//rAuth.DELETE(fmt.Sprintf("/leave/:%s", "10"),auth.Leave)
-		rAuth.POST("/refresh-token", auth.RefreshAccessToken)
-		rAuth.GET("info", auth.Info)
+		rAuth.POST("/refresh-token", login.RefreshAccessToken)
+		rAuth.GET("info", login.Info)
 	}
-	// TODO : 전체적인 error 메시지 json 으로 출력
+
 	//서버 시작
 	srv := &http.Server{
 		Handler:      r,
@@ -79,24 +79,7 @@ func Run() {
 		}
 	}()
 
-	WaitForShutdown(srv)
-}
-
-func WaitForShutdown(srv *http.Server) {
-	interruptChan := make(chan os.Signal, 1)
-	signal.Notify(interruptChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	//
-
-	<-interruptChan
-
-	// channel 서버 꺼질때까지 기다려주기
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-	err := srv.Shutdown(ctx)
-	if err != nil {
-		return
-	}
-	log.Println("Shutting down")
-	os.Exit(0)
-
+	//Graceful shutdown
+	//처리중이던 요청들이 모두 처리된 뒤에 종료가 되도록 하는 tool
+	tools.WaitForShutdown(srv)
 }

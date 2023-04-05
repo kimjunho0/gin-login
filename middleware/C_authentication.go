@@ -36,7 +36,7 @@ func TakeManagerInformation(phoneNumber string, project ...string) *models.User 
 		PhoneNumber: phoneNumber,
 	}
 	if err := migrate.DB.Select(project).Where("phone_number = ?", user.PhoneNumber).Take(&user).Error; err != nil {
-		panic(cerror.Forbidden())
+		panic(cerror.ForbiddenWithMsg("일치하는 사용자가 없습니다."))
 	}
 	return &user
 }
@@ -47,7 +47,7 @@ func GetInforUserById(id int, project ...string) *models.User {
 		Id: id,
 	}
 	if err := migrate.DB.Select(project).Take(&body).Error; err != nil {
-		panic("User by id error")
+		panic(cerror.DBErr(err))
 	}
 	return &body
 }
@@ -66,7 +66,7 @@ func CreatAccessToken(id int) (string, int64) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte("SECRET")) // SECRET 코드로 string 으로 바꿈
 	if err != nil {
-		panic("Unknown")
+		panic(cerror.Unknown(err))
 	}
 	return ss, expiresAt
 }
@@ -89,18 +89,18 @@ func GetReqManagerIdFromToken(r *http.Request) int {
 
 		//Session 체크 (access 토큰 생성되어 있어야 )
 		valid, reason := session.IsValid(managerId, token.Raw)
-		//valid 가 존재하지 않으면 = 유효기간 만료지
+		//valid 가 존재하지 않으면 = 유효기간 만료
 		if !valid {
 			if reason == session.Expired {
-				panic(http.StatusBadRequest)
+				panic(cerror.Forbidden())
 			} else if reason == session.MultiLogin {
-				panic(http.StatusInternalServerError)
+				panic(cerror.ForbiddenWithMsg(cerror.ErrMultiLogin))
 			}
 		}
 		return managerId
 
 	} else {
-		panic("error")
+		panic(cerror.Forbidden())
 	}
 
 }
@@ -134,12 +134,12 @@ func ParseTokenClaims(r *http.Request) (*jwt.Token, jwt.MapClaims) {
 		return []byte("SECRET"), nil
 	})
 	if err != nil {
-		panic(fmt.Sprintf("parse token claims error ", err))
+		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok { //token.Claims 로 파싱한 토큰값 정보를 가져온거같음
 		return token, claims //토큰값과 토큰정보 반환
 	} else {
-		panic("token claims error")
+		panic(cerror.Forbidden())
 	}
 }
 func ParseTokenClaimsWithoutExpValidation(r *http.Request) (*jwt.Token, jwt.MapClaims) {
@@ -151,12 +151,12 @@ func ParseTokenClaimsWithoutExpValidation(r *http.Request) (*jwt.Token, jwt.MapC
 		return []byte("SECRET"), nil
 	})
 	if err != nil {
-		panic(fmt.Sprintf("parse token claims error ", err))
+		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		return token, claims
 	} else {
-		panic("왜난거지")
+		panic(cerror.Forbidden())
 	}
 }
 
@@ -167,7 +167,7 @@ func ParseTokenClaimsWithoutExpValidation(r *http.Request) (*jwt.Token, jwt.MapC
 func ParseBearerToken(r *http.Request) string {
 	token, err := request.HeaderExtractor([]string{"auth-token"}).ExtractToken(r)
 	if err != nil {
-		panic(fmt.Sprintf("ParseBearer error %v", err))
+		panic(cerror.BadRequestWithMsg(err.Error()))
 	}
 
 	return strings.TrimPrefix(token, "Bearer ")

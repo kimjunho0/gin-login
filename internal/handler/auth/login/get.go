@@ -1,4 +1,4 @@
-package auth
+package login
 
 import (
 	"gin-login/middleware"
@@ -13,12 +13,12 @@ type GetInfo struct {
 }
 
 // @tags auth
-// @Summary 로그인정보
+// @Summary get_info
 // @Description 로그인한 자기 정보 가져오기
 // @Accept json
 // @Produce json
 // @Param auth-token header string true "access token"
-// @Success 200 {object} auth.GetInfo
+// @Success 200 {object} login.GetInfo
 // @Failure 400 {object} cerror.CustomError400
 // @Failure 401 {object} cerror.CustomError401
 // @Failure 500 {object} cerror.CustomError500

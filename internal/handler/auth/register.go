@@ -71,6 +71,8 @@ func Register(c *gin.Context) {
 	userExist := ifDeletedUser(tx, body)
 
 	if !userExist {
+
+		//회원가입
 		if err := tx.Create(&user).Error; err != nil {
 			//duplicate 검사
 			if db_error.IsUniqueViolation(err) {
@@ -80,6 +82,7 @@ func Register(c *gin.Context) {
 			}
 			panic(cerror.DBErr(err))
 		}
+		//재가입
 	} else {
 		if err := tx.Model(&user).Unscoped().
 			Where("phone_number = ?", body.PhoneNumber).
@@ -186,7 +189,7 @@ func PasswordValidity(pw string, number string) {
 func ifDeletedUser(tx *gorm.DB, body *RegisterIn) bool {
 	var model *models.User
 	//err 가 있으면 false 반환, 없으면 다음 조건문 실행
-	if err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Take(&model).Error; err != nil {
+	if err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Find(&model).Error; err != nil {
 		// record not found 가 존재하면 false 반환하기 = 레코드가 존재하지 않으니 아직 회원가입을 한적도 없는것
 		if db_error.IsRecordNotFound(err) {
 			return false //create
@@ -194,15 +197,21 @@ func ifDeletedUser(tx *gorm.DB, body *RegisterIn) bool {
 			panic(cerror.DBErr(err))
 		}
 	}
-	//다음 조건 deleted at 이 널인지 확인
-	if err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Take(&model).Error; err != nil {
-		//deleted at 이 비워져 있으면 false 반환
-		if db_error.IsRecordNotFound(err) {
-			return false
-		} else {
-			panic(cerror.DBErr(err))
-		}
+	//false 면 deleted_at 이 nil
+	if model.DeletedAt.Valid == false {
+		return false
 	}
-	//phone number 도 존재하며 deleted_at 이 비어있지 않으면 true 반환
 	return true
+
+	////다음 조건 deleted at 이 널인지 확인
+	//if err := tx.Unscoped().Where("phone_number = ?", body.PhoneNumber).Where("deleted_at IS NOT NULL").Take(&model).Error; err != nil {
+	//	//deleted at 이 비워져 있으면 false 반환
+	//	if db_error.IsRecordNotFound(err) {
+	//		return false
+	//	} else {
+	//		panic(cerror.DBErr(err))
+	//	}
+	//}
+	//phone number 도 존재하며 deleted_at 이 비어있지 않으면 true 반환
+
 }

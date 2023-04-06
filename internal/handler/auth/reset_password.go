@@ -1,4 +1,4 @@
-package login
+package auth
 
 import (
 	"gin-login/internal/constants"
@@ -31,8 +31,8 @@ const (
 // @Accept json
 // @Produce json
 // @Param num path string true "전화번호"
-// @Param body body login.ResetModel true "바꿀 비밀번호, 현재 비밀번호"
-// @Success 200 {object} login.IfSuccessReset
+// @Param body body auth.ResetModel true "바꿀 비밀번호, 현재 비밀번호"
+// @Success 200 {object} auth.IfSuccessReset
 // @Failure 400 {object} cerror.CustomError400
 // @Failure 401 {object} cerror.CustomError401
 // @Failure 500 {object} cerror.CustomError500

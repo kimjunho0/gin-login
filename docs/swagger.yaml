@@ -1,5 +1,61 @@
 basePath: /
 definitions:
+  auth.BindRefresh:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  auth.GetInfo:
+    properties:
+      name:
+        type: string
+      phone_number:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  auth.IfSuccessReset:
+    properties:
+      message:
+        type: string
+      status:
+        $ref: '#/definitions/constants.Status'
+    type: object
+  auth.NeedLogin:
+    properties:
+      password:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - password
+    - phone_number
+    type: object
+  auth.RegisterIn:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+    required:
+    - name
+    - password
+    - phone_number
+    type: object
+  auth.ResetModel:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
   cerror.CustomError400:
     properties:
       message:
@@ -35,62 +91,6 @@ definitions:
     x-enum-varnames:
     - StatusOk
     - StatusFail
-  login.BindRefresh:
-    properties:
-      refresh_token:
-        type: string
-    required:
-    - refresh_token
-    type: object
-  login.GetInfo:
-    properties:
-      name:
-        type: string
-      phone_number:
-        type: string
-      user_id:
-        type: integer
-    type: object
-  login.IfSuccessReset:
-    properties:
-      message:
-        type: string
-      status:
-        $ref: '#/definitions/constants.Status'
-    type: object
-  login.NeedLogin:
-    properties:
-      password:
-        type: string
-      phone_number:
-        type: string
-    required:
-    - password
-    - phone_number
-    type: object
-  login.RegisterIn:
-    properties:
-      name:
-        type: string
-      password:
-        type: string
-      phone_number:
-        type: string
-    required:
-    - name
-    - password
-    - phone_number
-    type: object
-  login.ResetModel:
-    properties:
-      new_password:
-        type: string
-      old_password:
-        type: string
-    required:
-    - new_password
-    - old_password
-    type: object
   middleware.AccessAndRefreshResponse:
     properties:
       access_token:
@@ -161,7 +161,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/login.GetInfo'
+            $ref: '#/definitions/auth.GetInfo'
         "400":
           description: Bad Request
           schema:
@@ -188,7 +188,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/login.NeedLogin'
+          $ref: '#/definitions/auth.NeedLogin'
       produces:
       - application/json
       responses:
@@ -258,7 +258,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/login.BindRefresh'
+          $ref: '#/definitions/auth.BindRefresh'
       produces:
       - application/json
       responses:
@@ -292,7 +292,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/login.RegisterIn'
+          $ref: '#/definitions/auth.RegisterIn'
       produces:
       - application/json
       responses:
@@ -329,14 +329,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/login.ResetModel'
+          $ref: '#/definitions/auth.ResetModel'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/login.IfSuccessReset'
+            $ref: '#/definitions/auth.IfSuccessReset'
         "400":
           description: Bad Request
           schema:
